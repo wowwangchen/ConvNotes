@@ -1,5 +1,13 @@
 <RCC>
     <qresource prefix="/">
         <file>image/titleIcon.jpg</file>
+        <file>image/setting.png</file>
+        <file>image/search.png</file>
+        <file>image/addNote.png</file>
+        <file>image/moreSelect.png</file>
+        <file>image/noteList.png</file>
+        <file>image/text.png</file>
+        <file>image/text_unuse.png</file>
+        <file>image/noteList_unuse.png</file>
     </qresource>
 </RCC>

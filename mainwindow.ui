@@ -96,6 +96,22 @@
             <number>0</number>
            </property>
            <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>10</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="horizontalLayout">
              <property name="spacing">
               <number>0</number>
@@ -106,11 +122,11 @@
                 <enum>Qt::Horizontal</enum>
                </property>
                <property name="sizeType">
-                <enum>QSizePolicy::Expanding</enum>
+                <enum>QSizePolicy::Preferred</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>250</width>
+                 <width>300</width>
                  <height>20</height>
                 </size>
                </property>
@@ -118,8 +134,20 @@
              </item>
              <item>
               <widget class="QPushButton" name="settingButton">
+               <property name="minimumSize">
+                <size>
+                 <width>40</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>30</width>
+                 <height>50</height>
+                </size>
+               </property>
                <property name="text">
-                <string>设置</string>
+                <string/>
                </property>
               </widget>
              </item>
@@ -128,9 +156,12 @@
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>80</width>
+                 <width>10</width>
                  <height>20</height>
                 </size>
                </property>
@@ -139,7 +170,13 @@
             </layout>
            </item>
            <item>
-            <widget class="QTreeView" name="allPackageTreeView">
+            <widget class="myTreeView" name="allPackageTreeView">
+             <property name="minimumSize">
+              <size>
+               <width>350</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="styleSheet">
               <string notr="true">background-color: transparent;
 border:none;</string>
@@ -153,6 +190,9 @@ border:none;</string>
            <property name="spacing">
             <number>0</number>
            </property>
+           <property name="topMargin">
+            <number>10</number>
+           </property>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <property name="spacing">
@@ -163,9 +203,12 @@ border:none;</string>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>40</width>
+                 <width>20</width>
                  <height>20</height>
                 </size>
                </property>
@@ -173,8 +216,23 @@ border:none;</string>
              </item>
              <item>
               <widget class="QLabel" name="iconPackageLabel">
+               <property name="minimumSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true"/>
+               </property>
                <property name="text">
-                <string>文件夹 图标</string>
+                <string/>
                </property>
               </widget>
              </item>
@@ -183,9 +241,12 @@ border:none;</string>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>40</width>
+                 <width>30</width>
                  <height>20</height>
                 </size>
                </property>
@@ -193,6 +254,18 @@ border:none;</string>
              </item>
              <item>
               <widget class="QLabel" name="packageNameLabel">
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>120</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text">
                 <string>文件夹名字</string>
                </property>
@@ -203,9 +276,12 @@ border:none;</string>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>40</width>
+                 <width>135</width>
                  <height>20</height>
                 </size>
                </property>
@@ -213,10 +289,38 @@ border:none;</string>
              </item>
              <item>
               <widget class="QPushButton" name="addFileButton">
+               <property name="minimumSize">
+                <size>
+                 <width>31</width>
+                 <height>31</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>30</width>
+                 <height>30</height>
+                </size>
+               </property>
                <property name="text">
-                <string>添加</string>
+                <string/>
                </property>
               </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_14">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>10</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
              </item>
             </layout>
            </item>
@@ -225,14 +329,20 @@ border:none;</string>
              <property name="spacing">
               <number>0</number>
              </property>
+             <property name="topMargin">
+              <number>5</number>
+             </property>
              <item>
               <spacer name="horizontalSpacer_5">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>40</width>
+                 <width>14</width>
                  <height>20</height>
                 </size>
                </property>
@@ -240,11 +350,23 @@ border:none;</string>
              </item>
              <item>
               <widget class="QLineEdit" name="searchLineText">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>40</height>
+                </size>
+               </property>
                <property name="toolTip">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="text">
-                <string>Search</string>
+                <string/>
                </property>
               </widget>
              </item>
@@ -253,9 +375,12 @@ border:none;</string>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>40</width>
+                 <width>20</width>
                  <height>20</height>
                 </size>
                </property>
@@ -263,8 +388,20 @@ border:none;</string>
              </item>
              <item>
               <widget class="QPushButton" name="searchButton">
+               <property name="minimumSize">
+                <size>
+                 <width>31</width>
+                 <height>31</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>31</width>
+                 <height>31</height>
+                </size>
+               </property>
                <property name="text">
-                <string>确定</string>
+                <string/>
                </property>
               </widget>
              </item>
@@ -273,9 +410,12 @@ border:none;</string>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>40</width>
+                 <width>10</width>
                  <height>20</height>
                 </size>
                </property>
@@ -298,10 +438,16 @@ border:none;</string>
            <property name="spacing">
             <number>0</number>
            </property>
+           <property name="topMargin">
+            <number>10</number>
+           </property>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <property name="spacing">
               <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>5</number>
              </property>
              <item>
               <spacer name="horizontalSpacer_8">
@@ -309,30 +455,7 @@ border:none;</string>
                 <enum>Qt::Horizontal</enum>
                </property>
                <property name="sizeType">
-                <enum>QSizePolicy::Expanding</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_4">
-               <property name="text">
-                <string>不知道</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_9">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Expanding</enum>
+                <enum>QSizePolicy::Fixed</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
@@ -343,9 +466,44 @@ border:none;</string>
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_5">
+              <widget class="QPushButton" name="textShowButton">
+               <property name="maximumSize">
+                <size>
+                 <width>35</width>
+                 <height>35</height>
+                </size>
+               </property>
                <property name="text">
-                <string>不知道</string>
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_9">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>30</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="listShowButton">
+               <property name="maximumSize">
+                <size>
+                 <width>35</width>
+                 <height>35</height>
+                </size>
+               </property>
+               <property name="text">
+                <string/>
                </property>
               </widget>
              </item>
@@ -367,6 +525,11 @@ border:none;</string>
              </item>
              <item>
               <widget class="QLabel" name="lastChangeDateLabel">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(132, 132, 132);
+font: 700 9pt &quot;Arial&quot;;
+</string>
+               </property>
                <property name="text">
                 <string>上次修改的日期</string>
                </property>
@@ -393,8 +556,20 @@ border:none;</string>
              </item>
              <item>
               <widget class="QPushButton" name="moreSelectButton">
+               <property name="minimumSize">
+                <size>
+                 <width>35</width>
+                 <height>35</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>35</width>
+                 <height>35</height>
+                </size>
+               </property>
                <property name="text">
-                <string>更多选项</string>
+                <string/>
                </property>
               </widget>
              </item>
@@ -403,9 +578,12 @@ border:none;</string>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>13</width>
+                 <width>40</width>
                  <height>20</height>
                 </size>
                </property>
@@ -432,6 +610,13 @@ font: 16pt &quot;Segoe Print&quot;;</string>
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>myTreeView</class>
+   <extends>QTreeView</extends>
+   <header>mytreeview.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="source.qrc"/>
  </resources>

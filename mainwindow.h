@@ -2,6 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include<QMessageBox>
+#include<QDateTime>
+#include<QColorDialog>
+#include<QMouseEvent>
+#include<QEvent>
+#include"mytreeview.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,6 +21,15 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void initWindow();
+    void initConnect();
+    void setColorDialogSS(QColorDialog *dialog);
+
+private slots:
+    void settingButton_clicked();
+protected:
+    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual bool eventFilter(QObject *obj, QEvent *event) override;
+
 
 private:
     Ui::MainWindow *ui;
