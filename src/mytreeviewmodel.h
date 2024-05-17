@@ -19,14 +19,13 @@
 class myTreeViewModel : public QAbstractItemModel
 {
     Q_OBJECT
+
 public:
     explicit myTreeViewModel(QObject *parent = nullptr);
      ~myTreeViewModel();
     //添加子节点到父节点，传入父节点，类型
     void appendChildNodeToParent(const QModelIndex &parentIndex,
                                  const QHash<NodeItem::Roles, QVariant> &data);
-    //更新指定类型的子节点的相对位置
-    void updateChildRelativePosition(NodeTreeItem *parent, const NodeItem::Type type);
     //从IDpath中获取文件夹的索引
     QModelIndex folderIndexFromIdPath(const NodePath &idPath);
     //获取新文件夹的占位名称
@@ -66,6 +65,7 @@ public:
     virtual QStringList mimeTypes() const override;
     //获取绝对路径并返回MimeData
     virtual QMimeData *mimeData(const QModelIndexList &indexes) const override;
+    //处理拖放操作
     virtual bool dropMimeData(const QMimeData *mime, Qt::DropAction action, int row, int column,
                               const QModelIndex &parent) override;
 
@@ -80,6 +80,26 @@ signals:
     void topLevelItemLayoutChanged();
     //请求改变节点相对位置的信号
     void requestUpdateNodeRelativePosition(int nodeId, int relativePosition);
+    //将文件夹移入垃圾桶
+    void requestMoveFolderToTrash(const QModelIndex &index);
+    //文件夹拖放完成的信号
+    void dropFolderSuccessful(const QString &paths);
+    //请求更新绝对路径
+    void requestUpdateAbsPath(const QString &oldPath, const QString &newPath);
+    //请求展开某个索引的位置
+    void requestExpand(const QString &indexPath);
+    //请求移动节点位置
+    void requestMoveNode(int nodeId, int targetId);
+
+private:
+    //为传入的父节点与子节点信息，为其新建子节点
+    void loadNodeTree(const QVector<NodeData> &nodeData, NodeTreeItem *rootNode);
+    //添加"所有笔记按钮"和垃圾桶按钮
+    void appendAllNotesAndTrashButton(NodeTreeItem *rootNode);
+    //添加文件夹间的分隔符
+    void appendFolderSeparator(NodeTreeItem *rootNode);
+    //更新指定类型的子节点的相对位置
+    void updateChildRelativePosition(NodeTreeItem *parent, const NodeItem::Type type);
 
 
 

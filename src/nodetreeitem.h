@@ -89,7 +89,7 @@ public:
 
 
 private:
-    QHash<NodeItem::Roles, QVariant>    m_itemData;         //自己的项的类型，然后映射成为一个值
+    QHash<NodeItem::Roles, QVariant>    m_itemData;         //自己的项的属性，建立哈希映射
     NodeTreeItem*                       m_parentItem;       //父节点
     QVector<NodeTreeItem*>               m_childItems;      //子节点
 };

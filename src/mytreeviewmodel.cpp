@@ -80,37 +80,6 @@ void myTreeViewModel::appendChildNodeToParent
     }
 }
 
-void myTreeViewModel::updateChildRelativePosition(NodeTreeItem *parent, const NodeItem::Type type)
-{
-    int relId = 0;
-    //遍历所有子节点
-    for (int i = 0; i < parent->childCount(); ++i)
-    {
-        auto child = parent->child(i);
-        auto childType =  //获取子节点类型
-            static_cast<NodeItem::Type>(child->data(NodeItem::Roles::ItemType).toInt());
-
-        //如果是指定类型的节点
-        if (childType == type)
-        {
-            //对指定类型进行分类处理
-            if (type == NodeItem::Type::FolderItem)
-            {
-                emit requestUpdateNodeRelativePosition(child->data(NodeItem::Roles::NodeId).toInt(),
-                                                       relId);
-                ++relId;
-            }
-            else
-            {
-                qDebug() << __FUNCTION__ << "Wrong type";
-                return;
-            }
-
-        }
-    }
-}
-
-
 
 QModelIndex myTreeViewModel::folderIndexFromIdPath(const NodePath &idPath)
 {
@@ -549,4 +518,344 @@ QMimeData *myTreeViewModel::mimeData(const QModelIndexList &indexes) const
     }
 }
 
+bool myTreeViewModel::dropMimeData(const QMimeData *mime, Qt::DropAction action,
+                                   int row, int column, const QModelIndex &parent)
+{
+    Q_UNUSED(column);
+    if (!(mime->hasFormat(FOLDER_MIME)) && action == Qt::MoveAction)
+    {
+        return false;
+    }
+
+    //如果是文件夹格式
+    if (mime->hasFormat(FOLDER_MIME))
+    {
+        //如果row为-1，根据父节点，放到0或者最后一行
+        if (row == -1)
+        {
+            if (parent.isValid())
+            {
+                row = 0;
+            }
+            else
+            {
+                // invalid index: append at bottom, after last toplevel
+                row = rowCount(parent);
+            }
+        }
+
+        //获取传入数据的绝对路径，对应的索引
+        auto absPath = QString::fromUtf8(mime->data(FOLDER_MIME));
+        auto index = folderIndexFromIdPath(absPath);
+        if (!index.isValid())
+        {
+            return false;
+        }
+
+
+        NodeTreeItem *parentItem, *movingItem;
+        //传入的父项不合法就把parentItem设为root
+        if (!parent.isValid())
+        {
+            parentItem = rootItem;
+        }
+        else
+        {
+            parentItem = static_cast<NodeTreeItem *>(parent.internalPointer());
+        }
+
+        //获取父项的类型，如果都不是文件夹项或根节点项或垃圾桶项，直接退出
+        auto parentType =
+            static_cast<NodeItem::Type>(parentItem->data(NodeItem::Roles::ItemType).toInt());
+        if (!(parentType == NodeItem::Type::FolderItem || parentType == NodeItem::Type::RootItem
+              || parentType == NodeItem::Type::TrashButton))
+        {
+            return false;
+        }
+
+        //传入数据对应的索引对应的项
+        movingItem = static_cast<NodeTreeItem *>(index.internalPointer());
+
+
+
+        //如果父项的类型是垃圾桶
+        if (parentType == NodeItem::Type::TrashButton)
+        {
+            //将这个项对应的索引的位置的内容删除
+            auto abs = movingItem->data(NodeItem::Roles::AbsPath).toString();
+            auto movingIndex = folderIndexFromIdPath(abs);
+
+            emit requestMoveFolderToTrash(movingIndex);
+            return false;
+        }
+
+        //父项是根节点项
+        if (parentType == NodeItem::Type::RootItem)
+        {
+            auto sep = getSeparatorIndex(); //获取所有分隔符的集合
+
+            if ((sep.size() == 2) && ((row <= sep[0].row()) || (row > sep[1].row())))
+            {
+                return false;
+            }
+
+            //获取默认笔记的索引
+            auto dfNote = getDefaultNotesIndex();
+            if (row <= dfNote.row())
+            {
+                return false;
+            }
+        }
+
+        //父节点的ID是特殊节点：默认笔记，退出
+        if (parent.data(NodeItem::Roles::NodeId).toInt() == SpecialNodeID::DefaultNotesFolder)
+        {
+            return false;
+        }
+
+
+
+        //拖动的文件夹的父项和目标父项是同一个父亲,表示在同一层级内进行拖放操作
+        if (movingItem->parentItem() == parentItem)
+        {
+            beginResetModel();
+
+            //遍历父项的所有子节点,找到拖放的文件夹项,并将其移动到指定的位置
+            for (int i = 0; i < parentItem->childCount(); ++i)
+            {
+                auto child = parentItem->child(i);
+                auto childType = //获取类型
+                    static_cast<NodeItem::Type>(child->data(NodeItem::Roles::ItemType).toInt());
+
+                if (childType == NodeItem::Type::FolderItem
+                    && child->data(NodeItem::Roles::NodeId)
+                           == movingItem->data(NodeItem::Roles::NodeId))//找到移动的项的子节点的位置
+                {
+                    int targetRow = row;
+                    if (row > i && row > 0)
+                    {
+                        targetRow -= 1;
+                    }
+
+                    parentItem->moveChild(i, targetRow);
+                    break;
+                }
+            }
+
+            endResetModel();
+            emit topLevelItemLayoutChanged();       //顶级项布局发生改变
+            updateChildRelativePosition(parentItem, NodeItem::Type::FolderItem);//更新子节点相对位置
+            emit dropFolderSuccessful(movingItem->data(NodeItem::Roles::AbsPath).toString());//文件夹拖放完成
+        }
+
+        //拖放的文件夹项和目标位置的父项不是同一个父项
+        else
+        {
+            auto movingParent = movingItem->parentItem();  //移动项的父节点
+
+            //找到自己在父项中的位置
+            int r = -1;
+            for (int i = 0; i < movingParent->childCount(); ++i)
+            {
+                auto child = movingParent->child(i);
+                auto childType =
+                    static_cast<NodeItem::Type>(child->data(NodeItem::Roles::ItemType).toInt());
+
+                if ((childType == NodeItem::Type::FolderItem)
+                    && (child->data(NodeItem::Roles::NodeId).toInt()
+                        == movingItem->data(NodeItem::Roles::NodeId).toInt()))
+                {
+                    r = i;
+                    break;
+                }
+            }
+            if (r == -1) //不存在
+            {
+                return false;
+            }
+
+            //根据位置获取项的指针
+            movingItem = movingParent->child(r);
+
+
+            //以前的绝对路径，新设置的绝对路径=父节点绝对路径路径+分隔符'/'+原本的绝对路径
+            auto oldAbsolutePath = movingItem->data(NodeItem::Roles::AbsPath).toString();
+            QString newAbsolutePath = parentItem->data(NodeItem::Roles::AbsPath).toString()
+                                      + PATH_SEPARATOR      //新建了字符串但没更新，所以后面要发送信号更新
+                                      + QString::number(movingItem->data(NodeItem::Roles::NodeId).toInt());
+            emit requestUpdateAbsPath(oldAbsolutePath, newAbsolutePath); //发送请求更新绝对路径的信号
+
+            //数据模型的重构
+            beginResetModel();
+
+            //父子关系修改
+            movingParent->takeChildAt(r);                   //移动的项的父项移出这个节点
+            movingItem->setParentItem(parentItem);          //指定目标父项为移动的项设置的新父项
+            movingItem->recursiveUpdateFolderPath(oldAbsolutePath, newAbsolutePath);//更新子节点的路径
+            parentItem->insertChild(row, movingItem);       //新父项在指定位置插入节点
+
+            //结束重构
+            endResetModel();
+
+            //更新信息
+            emit topLevelItemLayoutChanged();                                           //顶级布局发生改变
+            emit requestExpand(parentItem->data(NodeItem::Roles::AbsPath).toString());  //请求展开
+            emit requestMoveNode(movingItem->data(NodeItem::Roles::NodeId).toInt(),     //请求移动某个节点
+                                 parentItem->data(NodeItem::Roles::NodeId).toInt());
+            updateChildRelativePosition(parentItem, NodeItem::Type::FolderItem);        //更新子节点的相对位置
+            emit dropFolderSuccessful(movingItem->data(NodeItem::Roles::AbsPath).toString());//拖放新文件夹成功
+
+        }
+
+        //如果是文件夹格式
+        return true;
+    }
+
+    return false;
+
+}
+
+void myTreeViewModel::loadNodeTree(const QVector<NodeData> &nodeData, NodeTreeItem *rootNode)
+{
+    //根据节点ID获取项，方便查找
+    QHash<int, NodeTreeItem *> itemMap;
+
+    itemMap[SpecialNodeID::RootFolder] = rootNode;      //首先传入的根节点加入其中
+
+    //遍历所有传入的节点数据信息，建立哈希索引
+    for (const auto &node : nodeData)
+    {
+        //如果此节点ID不是特殊文件夹中的：根文件夹、垃圾桶文件夹、父节点也不是垃圾桶
+        if (node.id() != SpecialNodeID::RootFolder && node.id() != SpecialNodeID::TrashFolder
+            && node.parentId() != SpecialNodeID::TrashFolder)
+        {
+            //建立节点属性的键值哈希
+            auto hs = QHash<NodeItem::Roles, QVariant>{};
+
+            //如果是文件夹类型
+            if (node.nodeType() == NodeData::Folder)
+            {
+                hs[NodeItem::Roles::ItemType] = NodeItem::Type::FolderItem;
+                hs[NodeItem::Roles::AbsPath] = node.absolutePath();
+                hs[NodeItem::Roles::RelPos] = node.relativePosition();
+                hs[NodeItem::Roles::ChildCount] = node.childNotesCount();
+            }
+            //笔记类型
+            else if (node.nodeType() == NodeData::Note)
+            {
+                hs[NodeItem::Roles::ItemType] = NodeItem::Type::NoteItem;
+            }
+            else
+            {
+                qDebug() << "Wrong node type";
+                continue;
+            }
+
+            //建立都有的属性的哈希
+            hs[NodeItem::Roles::DisplayText] = node.fullTitle();
+            hs[NodeItem::Roles::NodeId] = node.id();
+
+            //创建新节点，建立之前的哈希映射
+            auto nodeItem = new NodeTreeItem(hs, rootNode);
+            itemMap[node.id()] = nodeItem;
+        }
+    }
+
+
+    //再次遍历所有传入的节点信息，进行父子关系的设置
+    for (const auto &node : nodeData)
+    {
+        if (node.id() != SpecialNodeID::RootFolder && node.parentId() != -1
+            && node.id() != SpecialNodeID::TrashFolder
+            && node.parentId() != SpecialNodeID::TrashFolder)
+        {
+            auto parentNode = itemMap.find(node.parentId());        //哈希表中能否找到此节点的父节点信息
+            auto nodeItem = itemMap.find(node.id());                //哈希表中能否找到此节点的信息
+
+            //如果都能找到，指定父子关系
+            if (parentNode != itemMap.end() && nodeItem != itemMap.end())
+            {
+                (*parentNode)->appendChild(*nodeItem);
+                (*nodeItem)->setParentItem(*parentNode);
+            }
+            else
+            {
+                qDebug() << "Can't find node!";
+                continue;
+            }
+        }
+    }
+}
+
+void myTreeViewModel::appendAllNotesAndTrashButton(NodeTreeItem *rootNode)
+{
+    //所有笔记按钮
+    {
+        auto hs = QHash<NodeItem::Roles, QVariant>{};
+
+        hs[NodeItem::Roles::ItemType] = NodeItem::Type::AllNoteButton; //类型
+        hs[NodeItem::Roles::DisplayText] = tr("All Notes");            //显示文字
+        hs[NodeItem::Roles::Icon] = u8"\ue2c7"; // folder              //图标
+
+        //新建节点项，添加父子关系
+        auto allNodeButton = new NodeTreeItem(hs, rootNode);
+        rootNode->appendChild(allNodeButton);
+    }
+
+    //垃圾桶按钮
+    {
+        auto hs = QHash<NodeItem::Roles, QVariant>{};
+
+        hs[NodeItem::Roles::ItemType] = NodeItem::Type::TrashButton;
+        hs[NodeItem::Roles::DisplayText] = tr("Trash");
+        hs[NodeItem::Roles::Icon] = u8"\uf1f8"; // fa-trash
+
+        auto trashButton = new NodeTreeItem(hs, rootNode);
+        rootNode->appendChild(trashButton);
+    }
+}
+
+void myTreeViewModel::appendFolderSeparator(NodeTreeItem *rootNode)
+{
+    //同上
+    auto hs = QHash<NodeItem::Roles, QVariant>{};
+
+    hs[NodeItem::Roles::ItemType] = NodeItem::Type::FolderSeparator;
+    hs[NodeItem::Roles::DisplayText] = tr("Folders");
+
+    auto folderSepButton = new NodeTreeItem(hs, rootNode);
+    rootNode->appendChild(folderSepButton);
+}
+
+void myTreeViewModel::updateChildRelativePosition(NodeTreeItem *parent, const NodeItem::Type type)
+{
+    int relId = 0;
+    //遍历所有子节点
+    for (int i = 0; i < parent->childCount(); ++i)
+    {
+        auto child = parent->child(i);
+
+        auto childType =  //获取子节点类型
+            static_cast<NodeItem::Type>(child->data(NodeItem::Roles::ItemType).toInt());
+
+        //如果是指定类型的节点
+        if (childType == type)
+        {
+            //对指定类型进行分类处理
+            if (type == NodeItem::Type::FolderItem)
+            {
+                //发送请求更新相对位置的信号
+                emit requestUpdateNodeRelativePosition(child->data(NodeItem::Roles::NodeId).toInt(),
+                                                       relId);
+                ++relId;
+            }
+            else
+            {
+                qDebug() << __FUNCTION__ << "Wrong type";
+                return;
+            }
+
+        }
+    }
+}
 

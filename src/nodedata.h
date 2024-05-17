@@ -13,10 +13,20 @@ enum Value {
 };
 }
 
+
+//包含一个节点项的所有数据
 class NodeData
 {
 public:
+    enum Type { Note = 0, Folder };
     NodeData();
+    int id() const;
+    int parentId() const;
+    NodeData::Type nodeType() const;
+    const QString &absolutePath() const;
+    int relativePosition() const;
+    int childNotesCount() const;
+    QString fullTitle() const;
 };
 
 #endif // NODEDATA_H
