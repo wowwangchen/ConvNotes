@@ -43,7 +43,7 @@ public:
     //返回当前正在编辑的索引
     const QModelIndex &currentEditingIndex() const;
     //重命名文件夹(当前索引)
-    void renameFolderName(const QString &newName);
+    void onRenameFolderFinished(const QString &newName);
     //设置当前索引
     void setCurrentIndexC(const QModelIndex &index);
     //设置主题风格
@@ -83,7 +83,8 @@ signals:
     void saveExpand(const QStringList &ex);
     //请求修改文件夹颜色
     void changeFolderColorRequested(const QModelIndex &index);
-
+    //请求重命名文件夹
+    void renameFolderRequested();
 
 
 public slots:

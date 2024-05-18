@@ -36,7 +36,7 @@ const QModelIndex &myTreeView::currentEditingIndex() const
     return m_currentEditingIndex;
 }
 
-void myTreeView::renameFolderName(const QString &newName)
+void myTreeView::onRenameFolderFinished(const QString &newName)
 {
     //如果当前编辑的索引是可用的
     if(m_currentEditingIndex.isValid())

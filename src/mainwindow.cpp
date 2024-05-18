@@ -41,7 +41,7 @@ void MainWindow::initWindow()
     //窗口分割比例
     ui->splitter->setStretchFactor(0, 5);
     ui->splitter->setStretchFactor(1, 6);
-    ui->splitter->setStretchFactor(2, 14);
+    ui->splitter->setStretchFactor(2, 18);
 
 
     temp_icon=QIcon(":/image/setting.png");
@@ -83,6 +83,11 @@ void MainWindow::initWindow()
     ui->searchLineText->setPlaceholderText("Search");
 
     ui->iconPackageLabel->setStyleSheet(iconColorss);
+
+    //m_treeModel=new myTreeViewModel;
+    //m_treeDelegate=new myTreeViewDelegate(ui->allPackageTreeView);
+    //ui->allPackageTreeView->setModel(m_treeModel);
+
 
 
 }

@@ -28,7 +28,7 @@ struct NoteTreeConstant
 
 
 
-
+//树形结构的代理，进行自定义的界面绘制
 class myTreeViewDelegate : public QStyledItemDelegate
 {
     Q_OBJECT

@@ -6,6 +6,7 @@
 #include <QVector>
 #include<QDebug>
 
+
 //树形结构的节点项空间，所有节点的类型
 namespace NodeItem
 {

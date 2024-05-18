@@ -9,6 +9,8 @@
 #include<QModelIndex>
 #include"mytreeview.h"
 
+
+//垃圾桶按钮的编辑代理
 class TrashButtonDelegateEditor : public QWidget
 {
     Q_OBJECT

@@ -8,11 +8,15 @@
 #include<QMouseEvent>
 #include<QEvent>
 #include"mytreeview.h"
-
+#include"mytreeviewdelegate.h"
+#include"mytreeviewmodel.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+
+//整个项目的主界面
+//分为treeView，listView，textEdit
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -33,5 +37,8 @@ protected:
 
 private:
     Ui::MainWindow *ui;
+    myTreeViewModel*        m_treeModel;
+    myTreeViewDelegate*     m_treeDelegate;
+
 };
 #endif // MAINWINDOW_H

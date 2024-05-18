@@ -13,6 +13,7 @@ SOURCES += \
     defaultnotefolderdelegateeditor.cpp \
     foldertreedelegateeditor.cpp \
     fontloader.cpp \
+    labeledittype.cpp \
     main.cpp \
     mainwindow.cpp \
     mytreeview.cpp \
@@ -29,6 +30,7 @@ HEADERS += \
     defaultnotefolderdelegateeditor.h \
     foldertreedelegateeditor.h \
     fontloader.h \
+    labeledittype.h \
     mainwindow.h \
     mytreeview.h \
     mytreeviewdelegate.h \
