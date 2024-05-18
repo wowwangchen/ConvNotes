@@ -1,3 +1,4 @@
+
 #ifndef MYTREEVIEW_H
 #define MYTREEVIEW_H
 
@@ -20,14 +21,6 @@ namespace Theme
 enum Value{Light=1,Dark,Sepia};
 };
 
-
-struct NoteTreeConstant
-{
-    static constexpr int folderItemHeight = 30;
-    static constexpr int tagItemHeight = 30;
-    static constexpr int folderLabelHeight = 35;
-    static constexpr int tagLabelHeight = 35;
-};
 
 class myTreeViewPrivate;
 

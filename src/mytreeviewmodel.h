@@ -71,9 +71,6 @@ public:
 
 
 
-public slots:
-    //void setTreeData(const NodeTagTreeData &treeData);
-
 
 signals:
     //顶级项的布局发生改变

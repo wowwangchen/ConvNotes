@@ -309,6 +309,7 @@ void myTreeViewModel::deleteRow(const QModelIndex &rowIndex, const QModelIndex &
     if (parentItem == rootItem)
     {
         beginResetModel();                       //开始清除模型中的数据，model内部会进行删除前的准备操作
+
         //这里不会造成内存泄漏，remove某一行后，delete后，调用item的析构函数，也会删除这某一行的所有子节点
         parentItem->removeChild(row);            //父节点移除这各子节点
         endResetModel();                        //结束清除，刷新视图等

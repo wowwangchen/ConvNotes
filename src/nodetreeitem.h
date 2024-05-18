@@ -44,7 +44,7 @@ enum Roles
 
 
 
-//此类是数据模型中的一项，包含某个点与操作其的函数
+//此类是数据模型中的一项，包含各种属性
 class NodeTreeItem
 {
 public:

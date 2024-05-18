@@ -9,21 +9,27 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    fontloader.cpp \
     main.cpp \
     mainwindow.cpp \
     mytreeview.cpp \
+    mytreeviewdelegate.cpp \
     mytreeviewmodel.cpp \
     nodedata.cpp \
     nodepath.cpp \
-    nodetreeitem.cpp
+    nodetreeitem.cpp \
+    pushbuttontype.cpp
 
 HEADERS += \
+    fontloader.h \
     mainwindow.h \
     mytreeview.h \
+    mytreeviewdelegate.h \
     mytreeviewmodel.h \
     nodedata.h \
     nodepath.h \
-    nodetreeitem.h
+    nodetreeitem.h \
+    pushbuttontype.h
 
 FORMS += \
     mainwindow.ui
