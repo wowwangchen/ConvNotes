@@ -9,6 +9,9 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    allnotebuttontreedelegateeditor.cpp \
+    defaultnotefolderdelegateeditor.cpp \
+    foldertreedelegateeditor.cpp \
     fontloader.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -18,9 +21,13 @@ SOURCES += \
     nodedata.cpp \
     nodepath.cpp \
     nodetreeitem.cpp \
-    pushbuttontype.cpp
+    pushbuttontype.cpp \
+    trashbuttondelegateeditor.cpp
 
 HEADERS += \
+    allnotebuttontreedelegateeditor.h \
+    defaultnotefolderdelegateeditor.h \
+    foldertreedelegateeditor.h \
     fontloader.h \
     mainwindow.h \
     mytreeview.h \
@@ -29,7 +36,8 @@ HEADERS += \
     nodedata.h \
     nodepath.h \
     nodetreeitem.h \
-    pushbuttontype.h
+    pushbuttontype.h \
+    trashbuttondelegateeditor.h
 
 FORMS += \
     mainwindow.ui

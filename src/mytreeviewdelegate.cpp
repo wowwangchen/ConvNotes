@@ -3,6 +3,11 @@
 #include "fontloader.h"
 #include"pushbuttontype.h"
 
+#include "defaultnotefolderdelegateeditor.h"
+#include "trashbuttondelegateeditor.h"
+#include "foldertreedelegateeditor.h"
+#include "allnotebuttontreedelegateeditor.h"
+
 myTreeViewDelegate::myTreeViewDelegate(QTreeView *view, QObject *parent, QListView *listView)
     : QStyledItemDelegate(parent),
 
@@ -454,6 +459,7 @@ QWidget *myTreeViewDelegate::createEditor
     //文件夹类型
     if (itemType == NodeItem::Type::FolderSeparator)
     {
+            //编辑器样式
             auto widget = new QWidget(parent);
             widget->setContentsMargins(0, 0, 0, 0);
             auto layout = new QHBoxLayout(widget);
@@ -473,11 +479,15 @@ QWidget *myTreeViewDelegate::createEditor
             addButton->setMinimumSize({ 38, 25 });
             addButton->setCursor(QCursor(Qt::PointingHandCursor));
             addButton->setFocusPolicy(Qt::TabFocus);
+
+            //图标位置偏移量
 #ifdef __APPLE__
             int iconPointSizeOffset = 0;
 #else
             int iconPointSizeOffset = -4;
 #endif
+
+            //设置按钮的字体、图标、样式表
             addButton->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
                                                                   16 + iconPointSizeOffset));
             addButton->setText(u8"\uf067"); // fa_plus
@@ -497,14 +507,67 @@ QWidget *myTreeViewDelegate::createEditor
                                                     R"(    color: rgb(39, 85, 125); )"
                                                     R"(})"));
 
+
+            //创建信号与槽
             if (itemType == NodeItem::Type::FolderSeparator)
             {
+                //点击这个按钮添加一个文件夹
                 connect(addButton, &QPushButton::clicked, this, &myTreeViewDelegate::addFolderRequested);
             }
 
-            layout->addWidget(addButton, 1, Qt::AlignRight);
+            layout->addWidget(addButton, 1, Qt::AlignRight); //右对齐
+
             return widget;
     }
+
+    //如果是文件夹，设置相应的编辑器控件
+    else if (itemType == NodeItem::Type::FolderItem)
+    {
+            //看节点的ID是不是默认笔记文件夹
+            auto id = index.data(NodeItem::Roles::NodeId).toInt();
+
+            if (id == SpecialNodeID::DefaultNotesFolder)
+            {
+                auto widget =
+                    new DefaultNoteFolderDelegateEditor(m_view, option, index, m_listView, parent);
+                widget->setTheme(m_theme);
+                connect(this, &myTreeViewDelegate::themeChanged, widget,
+                        &DefaultNoteFolderDelegateEditor::setTheme);
+                return widget;
+            }
+
+            else
+            {
+                auto widget = new FolderTreeDelegateEditor(m_view, option, index, m_listView, parent);
+                widget->setTheme(m_theme);
+                connect(this, &myTreeViewDelegate::themeChanged, widget,
+                        &FolderTreeDelegateEditor::setTheme);
+                return widget;
+            }
+    }
+
+    //垃圾桶按钮
+    else if (itemType == NodeItem::Type::TrashButton)
+    {
+            auto widget = new TrashButtonDelegateEditor(m_view, option, index, m_listView, parent);
+            widget->setTheme(m_theme);
+            connect(this, &myTreeViewDelegate::themeChanged, widget,
+                    &TrashButtonDelegateEditor::setTheme);
+            return widget;
+    }
+
+    //所有笔记按钮
+    else if (itemType == NodeItem::Type::AllNoteButton)
+    {
+            auto widget =
+                new AllNoteButtonTreeDelegateEditor(m_view, option, index, m_listView, parent);
+            widget->setTheme(m_theme);
+            connect(this, &myTreeViewDelegate::themeChanged, widget,
+                    &AllNoteButtonTreeDelegateEditor::setTheme);
+            return widget;
+    }
+
+    return nullptr;
 }
 
 
