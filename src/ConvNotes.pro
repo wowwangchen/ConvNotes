@@ -10,14 +10,19 @@ CONFIG += c++17
 
 SOURCES += \
     allnotebuttontreedelegateeditor.cpp \
+    customapplicationstyle.cpp \
+    customdocument.cpp \
+    dbmanager.cpp \
     defaultnotefolderdelegateeditor.cpp \
     foldertreedelegateeditor.cpp \
     fontloader.cpp \
     labeledittype.cpp \
     main.cpp \
     mainwindow.cpp \
+    mylistview.cpp \
     mytreeview.cpp \
     mytreeviewdelegate.cpp \
+    mytreeviewlogic.cpp \
     mytreeviewmodel.cpp \
     nodedata.cpp \
     nodepath.cpp \
@@ -27,13 +32,18 @@ SOURCES += \
 
 HEADERS += \
     allnotebuttontreedelegateeditor.h \
+    customapplicationstyle.h \
+    customdocument.h \
+    dbmanager.h \
     defaultnotefolderdelegateeditor.h \
     foldertreedelegateeditor.h \
     fontloader.h \
     labeledittype.h \
     mainwindow.h \
+    mylistview.h \
     mytreeview.h \
     mytreeviewdelegate.h \
+    mytreeviewlogic.h \
     mytreeviewmodel.h \
     nodedata.h \
     nodepath.h \

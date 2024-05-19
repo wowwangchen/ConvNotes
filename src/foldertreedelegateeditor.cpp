@@ -61,6 +61,8 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
 #else
     int iconPointSizeOffset = -4;
 #endif
+
+    //展开折叠图标
     m_expandIcon->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
                                                              10 + iconPointSizeOffset));
 
@@ -72,6 +74,7 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
         layout->addSpacing(2);
     }
 
+    //文件夹图标
     m_folderIcon = new PushButtonType(parent);
     m_folderIcon->setMaximumSize({ 19, 20 });
     m_folderIcon->setMinimumSize({ 19, 20 });
@@ -83,6 +86,7 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
     layout->addSpacing(5);
 
 
+    //展示的内容
     m_label = new LabelEditType(this);
     m_label->setFont(m_titleFont);
     QSizePolicy labelPolicy;
@@ -90,17 +94,22 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
     labelPolicy.setHorizontalPolicy(QSizePolicy::Expanding);
     m_label->setSizePolicy(labelPolicy);
     m_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+    //正在编辑状态
     connect(m_label, &LabelEditType::editingStarted, this, [this] {
         auto tree_view = dynamic_cast<myTreeView *>(m_view);
         tree_view->setIsEditing(true);
     });
+    //编辑完成状态
     connect(m_label, &LabelEditType::editingFinished, this, [this](const QString &label) {
         auto tree_view = dynamic_cast<myTreeView *>(m_view);
         tree_view->onRenameFolderFinished(label);
         tree_view->setIsEditing(false);
     });
+    //重命名
     connect(dynamic_cast<myTreeView *>(m_view), &myTreeView::renameFolderRequested, m_label,
             &LabelEditType::openEditor);
+
     layout->addWidget(m_label);
     layout->addSpacing(5);
     m_contextButton = new PushButtonType(parent);
@@ -188,10 +197,12 @@ void FolderTreeDelegateEditor::setTheme(Theme::Value theme)
 
 void FolderTreeDelegateEditor::updateDelegate()
 {
+    //显示的文本
     auto displayName = m_index.data(NodeItem::Roles::DisplayText).toString();
     QFontMetrics fm(m_titleFont);
     displayName = fm.elidedText(displayName, Qt::ElideRight, m_label->contentsRect().width());
 
+    //显示的label的样式表
     if (m_view->selectionModel()->isSelected(m_index))
     {
         m_label->setStyleSheet(QStringLiteral("QLabel{color: rgb(%1, %2, %3);}")
@@ -216,9 +227,12 @@ void FolderTreeDelegateEditor::updateDelegate()
                      QString::number(m_folderIconColor.green()),
                      QString::number(m_folderIconColor.blue())));
     }
+
     m_label->setText(displayName);
     auto theme = dynamic_cast<myTreeView*>(m_view)->theme();
 
+
+    //折叠展开状态的图标
     QColor chevronColor(theme == Theme::Dark ? QColor(169, 160, 172) : QColor(103, 99, 105));
     m_expandIcon->setStyleSheet(QStringLiteral("QLabel{color: rgb(%1, %2, %3);}")
                                     .arg(QString::number(chevronColor.red()),
@@ -239,6 +253,7 @@ void FolderTreeDelegateEditor::updateDelegate()
 
 void FolderTreeDelegateEditor::paintEvent(QPaintEvent *event)
 {
+    //绘制代理编辑器控件界面
     updateDelegate();
     QPainter painter(this);
     if (m_view->selectionModel()->isSelected(m_index))

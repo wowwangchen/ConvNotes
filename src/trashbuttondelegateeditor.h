@@ -20,6 +20,26 @@ public:
                                        QWidget *parent = nullptr);
 
     void setTheme(Theme::Value theme);
+
+private:
+    QStyleOptionViewItem m_option;
+    QModelIndex m_index;
+    QString m_displayFont;
+    QFont m_titleFont;
+    QFont m_numberOfNotesFont;
+    QColor m_titleColor;
+    QColor m_titleSelectedColor;
+    QColor m_activeColor;
+    QColor m_hoverColor;
+    QColor m_folderIconColor;
+    QColor m_numberOfNotesColor;
+    QColor m_numberOfNotesSelectedColor;
+    QTreeView *m_view;
+    QListView *m_listView;
+    Theme::Value m_theme;
+    // QWidget interface
+protected:
+    virtual void paintEvent(QPaintEvent *event) override;
 };
 
 #endif // TRASHBUTTONDELEGATEEDITOR_H

@@ -3,12 +3,25 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , ui(new Ui::MainWindow),
+    m_treeModel(new myTreeViewModel(this)),
+    m_newNoteButton(nullptr),
+    m_dotsButton(nullptr),
+    m_searchButton(nullptr),
+    m_switchToTextViewButton(nullptr),
+    m_switchToKanbanViewButton(nullptr),
+    m_globalSettingsButton(nullptr),
+    m_searchEdit(nullptr),
+    m_textEdit(nullptr),
+    m_editorDateLabel(nullptr)
+
+
 {
     ui->setupUi(this);
     setMouseTracking(true);
     ui->iconPackageLabel->installEventFilter(this);  //组件必须安装事件过滤器，主窗口才能接收到事件
 
+    setupMainWindow();
     initWindow();
     initConnect();
 }
@@ -16,6 +29,34 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::setupMainWindow()
+{
+    //setupModelView();
+
+    //各种按钮的设置
+    m_newNoteButton = ui->addFileButton;
+    m_dotsButton = ui->moreSelectButton;
+    m_globalSettingsButton = ui->settingButton;
+    m_searchEdit = ui->searchLineText;
+    m_textEdit = ui->mainTextEdit;
+    m_editorDateLabel = ui->lastChangeDateLabel;
+    m_switchToTextViewButton = ui->textShowButton;
+    m_switchToKanbanViewButton = ui->listShowButton;
+
+    m_newNoteButton->setToolTip(tr("Create New Note"));
+    m_dotsButton->setToolTip(tr("Open Editor Settings"));
+    m_globalSettingsButton->setToolTip(tr("Open App Settings"));
+    m_switchToTextViewButton->setToolTip("Switch To Text View");
+    m_switchToKanbanViewButton->setToolTip("Switch To Kanban View");
+}
+
+void MainWindow::setupModelView()
+{
+    //文件夹树形结构
+    m_treeView = static_cast<myTreeView*>(ui->allPackageTreeView);
+    m_treeView->setModel(m_treeModel);
 }
 
 void MainWindow::initWindow()
