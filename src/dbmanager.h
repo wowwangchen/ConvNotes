@@ -4,19 +4,27 @@
 #include <QObject>
 #include<QVector>
 #include<QMap>
+#include<QDebug>
+#include<QString>
+#include<QtSql/QSqlDatabase>
+#include<QSqlQuery>
+#include<QSqlError>
 #include"nodedata.h"
 #include"nodepath.h"
+
+#define DEFAULT_DATABASE_NAME "default_database"
 
 struct NodeTagTreeData
 {
     QVector<NodeData> nodeTreeData;
     //QVector<TagData> tagTreeData;
 };
+
 using FolderListType = QMap<int, QString>;
 
 
 
-//数据库管理类，本地数据库
+//数据库管理类，本地数据库，设置一个数据库的默认地址，每次都连接那个数据库
 class DBManager :  public QObject
 {
     Q_OBJECT
@@ -32,6 +40,14 @@ public:
     //获取文件夹列表的键值对
     Q_INVOKABLE FolderListType getFolderList();
 
+private:
+    void open(const QString &path, bool doCreate = false);
+    void createTables();
+    void recalculateChildNotesCount();
+    int nextAvailableNodeId();
+    void increaseChildNotesCountFolder(int folderId);
+    void decreaseChildNotesCountFolder(int folderId);
+
 signals:
     void nodesTagTreeReceived(const NodeTagTreeData &treeData);
     void childNotesCountUpdatedFolder(int folderId, const QString &path, int childCount);
@@ -40,6 +56,11 @@ public slots:
     void renameNode(int id, const QString &newName);
     void moveNode(int nodeId, const NodeData &target);
     void updateRelPosNode(int nodeId, int relPos);
+    int addNode(const NodeData &node);
+
+private:
+    QString m_dbpath;
+    QSqlDatabase m_db;
 };
 
 #endif // DBMANAGER_H

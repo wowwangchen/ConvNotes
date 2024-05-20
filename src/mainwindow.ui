@@ -424,7 +424,7 @@ border:none;</string>
             </layout>
            </item>
            <item>
-            <widget class="QListView" name="filesListView">
+            <widget class="myListView" name="filesListView">
              <property name="styleSheet">
               <string notr="true">background-color: transparent;
 border:none;</string>
@@ -620,6 +620,11 @@ font: 16pt &quot;Segoe Print&quot;;</string>
    <class>myTreeView</class>
    <extends>QTreeView</extends>
    <header>mytreeview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>myListView</class>
+   <extends>QListView</extends>
+   <header location="global">mylistview.h</header>
   </customwidget>
  </customwidgets>
  <resources>

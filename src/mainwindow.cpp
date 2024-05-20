@@ -7,6 +7,9 @@ MainWindow::MainWindow(QWidget *parent)
     m_treeView(nullptr),
     m_treeModel(new myTreeViewModel(this)),
     m_treeViewLogic(nullptr),
+    m_listView(nullptr),
+
+    //m_dbManager(nullptr),
 
     m_newNoteButton(nullptr),
     m_dotsButton(nullptr),
@@ -24,7 +27,10 @@ MainWindow::MainWindow(QWidget *parent)
     setMouseTracking(true);
     ui->iconPackageLabel->installEventFilter(this);  //组件必须安装事件过滤器，主窗口才能接收到事件
 
+    //m_dbManager=new DBManager;
+
     setupMainWindow();
+    //setupModelView();
     initWindow();
     initConnect();
 }
@@ -57,9 +63,11 @@ void MainWindow::setupMainWindow()
 
 void MainWindow::setupModelView()
 {
+    m_listView=ui->filesListView;
     //文件夹树形结构
     m_treeView = static_cast<myTreeView*>(ui->allPackageTreeView);
     m_treeView->setModel(m_treeModel);
+    m_treeViewLogic = new myTreeViewLogic(m_treeView, m_treeModel, m_dbManager, m_listView, this);
 }
 
 void MainWindow::initWindow()

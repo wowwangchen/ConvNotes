@@ -80,6 +80,7 @@ protected:
 private:
     Ui::MainWindow *ui;
     //以下全是代指ui界面中的控件
+    myListView*             m_listView;                     //文件列表结构
     myTreeView*             m_treeView;                     //代指文件夹展示treeView
     myTreeViewModel*        m_treeModel;                    //ui->treeView的数据模型
     myTreeViewLogic*        m_treeViewLogic;                //MVD和数据库逻辑统一的类
@@ -93,11 +94,13 @@ private:
     CustomDocument*         m_textEdit;                     //代表文本编辑框
     QLabel*                 m_editorDateLabel;              //代表日期编辑标签
 
+    DBManager*              m_dbManager;                    //数据库
+
 
     QString                 m_displayFont;                  //展示的内容的字体
-    Theme::Value m_currentTheme;
-    QColor m_currentEditorTextColor;
-    QMenu m_mainMenu;
+    Theme::Value            m_currentTheme;                 //当前主题
+    QColor                  m_currentEditorTextColor;       //当前编辑的内容的颜色
+    QMenu                   m_mainMenu;                     //菜单
 
 
 };

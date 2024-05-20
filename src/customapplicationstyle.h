@@ -10,6 +10,7 @@ class CustomApplicationStyle : public QProxyStyle
 public:
     CustomApplicationStyle();
 
+    //重写和定制各种绘制元素的方法
     void drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter,
                        const QWidget *widget) const;
     void setTheme(Theme::Value theme);
