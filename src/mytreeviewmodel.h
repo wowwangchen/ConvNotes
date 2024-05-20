@@ -11,7 +11,7 @@
 #include"nodepath.h"
 #include"nodetreeitem.h"
 #include"nodedata.h"
-
+#include"dbmanager.h"
 
 
 
@@ -69,7 +69,8 @@ public:
     virtual bool dropMimeData(const QMimeData *mime, Qt::DropAction action, int row, int column,
                               const QModelIndex &parent) override;
 
-
+public slots:
+    void setTreeData(const NodeTagTreeData &treeData);
 
 
 signals:

@@ -1,6 +1,7 @@
 #include "customdocument.h"
 
-CustomDocument::CustomDocument(QWidget *parent)
+CustomDocument::CustomDocument(QWidget* parent) : QTextEdit(parent)
 {
 
 }
+

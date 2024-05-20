@@ -4,7 +4,10 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow),
+    m_treeView(nullptr),
     m_treeModel(new myTreeViewModel(this)),
+    m_treeViewLogic(nullptr),
+
     m_newNoteButton(nullptr),
     m_dotsButton(nullptr),
     m_searchButton(nullptr),

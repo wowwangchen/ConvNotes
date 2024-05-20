@@ -11,6 +11,7 @@
 #include<QDropEvent>
 #include<QMimeData>
 #include<QMenu>
+#include<QString>
 #include<QtWidgets/5.12.9/QtWidgets/private/qabstractitemview_p.h>
 #include"mytreeviewmodel.h"
 #include"nodepath.h"
@@ -37,7 +38,7 @@ class myTreeView:public QTreeView
 public:
     myTreeView(QWidget *parent = nullptr);
     //设置树形结构的分隔界限
-    void setTreeSeperator(const QVector<QModelIndex> &newSeperator,const QModelIndex &defaultNotesIndex);
+    void setTreeSeparator(const QVector<QModelIndex> &newSeperator,const QModelIndex &defaultNotesIndex);
     //当前是否正在编辑
     void setIsEditing(bool newIsEditing);
     //返回当前正在编辑的索引
@@ -53,7 +54,8 @@ public:
     //根据枚举类型具体设置
     void updateTheme(Theme::Value theme);
     //重新展开树形结构
-    void reExpand();
+    void reExpandC();
+    void reExpandC(const QStringList &expanded);
     //关闭当前正在编辑的项
     void closeCurrentEditor();
     //更新正在编辑的节点
@@ -66,8 +68,10 @@ public:
 
 
 signals:
+    //请求添加文件
+    void addFolderRequested();
     //从数据库中重命名文件夹的信号
-    void renameFolderNameInDatabase(const QModelIndex &index, const QString &newName);
+    void renameFolderInDatabase(const QModelIndex &index, const QString &newName);
     //请求移动节点位置的信号
     void requestMoveNode(int node, int target);
     //请求加载上次选择的笔记
@@ -85,6 +89,8 @@ signals:
     void changeFolderColorRequested(const QModelIndex &index);
     //请求重命名文件夹
     void renameFolderRequested();
+    //请求移动节点位置
+    void moveNodeRequested(int node, int target);
 
 
 public slots:

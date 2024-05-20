@@ -1,6 +1,8 @@
 #include "mylistview.h"
 
-myListView::myListView()
+
+
+myListView::myListView(QWidget *parent) : QListView(parent)
 {
 
 }

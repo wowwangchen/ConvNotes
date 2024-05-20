@@ -716,6 +716,25 @@ bool myTreeViewModel::dropMimeData(const QMimeData *mime, Qt::DropAction action,
 
 }
 
+void myTreeViewModel::setTreeData(const NodeTagTreeData &treeData)
+{
+    beginResetModel();
+
+    delete rootItem;
+    auto hs = QHash<NodeItem::Roles, QVariant>{};
+    hs[NodeItem::Roles::ItemType] = NodeItem::Type::RootItem;
+    rootItem = new NodeTreeItem(hs);
+
+    appendAllNotesAndTrashButton(rootItem);
+    appendFolderSeparator(rootItem);
+    loadNodeTree(treeData.nodeTreeData, rootItem);
+    //appendTagsSeparator(rootItem);
+    //loadTagList(treeData.tagTreeData, rootItem);
+    rootItem->recursiveSort();
+
+    endResetModel();
+}
+
 void myTreeViewModel::loadNodeTree(const QVector<NodeData> &nodeData, NodeTreeItem *rootNode)
 {
     //根据节点ID获取项，方便查找

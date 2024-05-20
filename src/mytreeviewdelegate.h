@@ -34,7 +34,7 @@ class myTreeViewDelegate : public QStyledItemDelegate
     Q_OBJECT
 
 public:
-    //初始化成员列表
+    //初始化成员列表 //
     explicit myTreeViewDelegate(QTreeView *view, QObject *parent = nullptr,
                               QListView *listView = nullptr);
     //设置主题，改变变量的值

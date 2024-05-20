@@ -14,6 +14,11 @@ NodeData::NodeData() :
 
 }
 
+NodeData::~NodeData()
+{
+
+}
+
 int NodeData::id() const
 {
     return m_id;

@@ -5,7 +5,7 @@ myTreeView::myTreeView(QWidget* parent)
     Q_UNUSED(parent);
 }
 
-void myTreeView::setTreeSeperator(const QVector<QModelIndex> &newSeperator, const QModelIndex &defaultNotesIndex)
+void myTreeView::setTreeSeparator(const QVector<QModelIndex> &newSeperator, const QModelIndex &defaultNotesIndex)
 {
     //关闭之前的所有索引的持久化
     for(const auto &sep : qAsConst(m_treeSeparator))
@@ -50,7 +50,7 @@ void myTreeView::onRenameFolderFinished(const QString &newName)
         {
             QModelIndex index=m_currentEditingIndex;
             closeCurrentEditor();
-            emit renameFolderNameInDatabase(index,newName);
+            emit renameFolderInDatabase(index,newName);
         }
         else
         {
@@ -80,23 +80,21 @@ Theme::Value myTreeView::theme() const
 
 void myTreeView::updateTheme(Theme::Value theme)
 {
-    //修改样式表
-    switch (theme) {
-    case Theme::Value::Light:
-        //
-        break;
-
-    case Theme::Value::Dark:
-        //
-        break;
-
-    case Theme::Value::Sepia:
-        //
-        break;
+    std::string classNames=QString::fromStdString(std::to_string(theme)).toLower().toStdString();
+    if (this->styleSheet().isEmpty())
+    {
+        qWarning() << "setCSSClassesAndUpdate: styleSheet is empty for widget with name "
+                   << this->objectName();
     }
+
+    // set the class
+    this->setProperty("class", classNames.c_str());
+    // update the widget
+    this->style()->polish(this);
+    this->update();
 }
 
-void myTreeView::reExpand()
+void myTreeView::reExpandC()
 {
     //获取之前展开的项的地址
     auto needExpand = std::move(m_expanded);
@@ -118,6 +116,13 @@ void myTreeView::reExpand()
             expand(index);
         }
     }
+}
+
+void myTreeView::reExpandC(const QStringList &expanded)
+{
+    m_expanded.clear();
+    m_expanded = expanded.toVector();
+    reExpandC();
 }
 
 void myTreeView::closeCurrentEditor()
@@ -149,6 +154,11 @@ void myTreeView::updateEditingIndex(QPoint pos)
             closeCurrentEditor();
         }
     }
+}
+
+void myTreeView::setIgnoreThisCurrentLoad(bool newIgnoreThisCurrentLoad)
+{
+    m_ignoreThisCurrentLoad = newIgnoreThisCurrentLoad;
 }
 
 bool myTreeView::isDragging() const
@@ -231,7 +241,7 @@ void myTreeView::onFolderDropSuccessful(const QString &path)
 void myTreeView::reset()
 {
     closeCurrentEditor();
-    reExpand();
+    reExpandC();
 }
 
 void myTreeView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
