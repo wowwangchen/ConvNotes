@@ -454,6 +454,753 @@ int DBManager::nextAvailableNodeId()
     return 0;
 }
 
+void DBManager::onNotesListInFolderRequested(int parentID, bool isRecursive, bool newNote, int scrollToId)
+{
+    QVector<NodeData> nodeList;
+    QSqlQuery query(m_db);
+
+    //如果父节点是根节点
+    if (parentID == SpecialNodeID::RootFolder)
+    {
+        //查询是笔记节点但父节点不是垃圾桶的节点
+        query.prepare(R"(SELECT )"
+                      R"("id",)"
+                      R"("title",)"
+                      R"("creation_date",)"
+                      R"("modification_date",)"
+                      R"("deletion_date",)"
+                      R"("content",)"
+                      R"("node_type",)"
+                      R"("parent_id",)"
+                      R"("relative_position",)"
+                      R"("scrollbar_position",)"
+                      R"("absolute_path", )"
+                      R"("is_pinned_note", )"
+                      R"("relative_position_an", )"
+                      R"("child_notes_count" )"
+                      R"(FROM node_table )"
+                      R"(WHERE node_type = (:node_type) AND parent_id != (:parent_id);)");
+        query.bindValue(QStringLiteral(":node_type"), static_cast<int>(NodeData::Note));
+        query.bindValue(QStringLiteral(":parent_id"), static_cast<int>(SpecialNodeID::TrashFolder));
+
+
+        bool status = query.exec();
+        if (status)
+        {
+            //遍历所有结果
+            while (query.next())
+            {
+                NodeData node;
+                node.setId(query.value(0).toInt());
+                node.setFullTitle(query.value(1).toString());
+                node.setCreationDateTime(
+                    QDateTime::fromMSecsSinceEpoch(query.value(2).toLongLong()));
+                node.setLastModificationDateTime(
+                    QDateTime::fromMSecsSinceEpoch(query.value(3).toLongLong()));
+                node.setDeletionDateTime(
+                    QDateTime::fromMSecsSinceEpoch(query.value(4).toLongLong()));
+                node.setContent(query.value(5).toString());
+                node.setNodeType(static_cast<NodeData::Type>(query.value(6).toInt()));
+                node.setParentId(query.value(7).toInt());
+                node.setRelativePosition(query.value(8).toInt());
+                node.setScrollBarPosition(query.value(9).toInt());
+                node.setAbsolutePath(query.value(10).toString());
+                node.setIsPinnedNote(static_cast<bool>(query.value(11).toInt()));
+                node.setRelativePosAN(query.value(13).toInt());
+                node.setChildNotesCount(query.value(14).toInt());
+                auto p = getNode(node.parentId());
+                node.setParentName(p.fullTitle());
+
+                nodeList.append(node);
+            }
+        }
+        else
+        {
+            qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+        }
+    }
+
+    //如果不是递归的
+    else if (isRecursive==false)
+    {
+        //查找所有父节点是指定节点且为笔记类型的节点
+        query.prepare(R"(SELECT )"
+                      R"("id",)"
+                      R"("title",)"
+                      R"("creation_date",)"
+                      R"("modification_date",)"
+                      R"("deletion_date",)"
+                      R"("content",)"
+                      R"("node_type",)"
+                      R"("parent_id",)"
+                      R"("relative_position", )"
+                      R"("scrollbar_position",)"
+                      R"("absolute_path", )"
+                      R"("is_pinned_note", )"
+                      R"("relative_position_an", )"
+                      R"("child_notes_count" )"
+                      R"(FROM node_table )"
+                      R"(WHERE parent_id = (:parent_id) AND node_type = (:node_type);)");
+        query.bindValue(QStringLiteral(":parent_id"), parentID);
+        query.bindValue(QStringLiteral(":node_type"), static_cast<int>(NodeData::Note));
+
+        bool status = query.exec();
+        if (status)
+        {
+            //遍历所有结果然后添加
+            while (query.next())
+            {
+                NodeData node;
+                node.setId(query.value(0).toInt());
+                node.setFullTitle(query.value(1).toString());
+                node.setCreationDateTime(
+                    QDateTime::fromMSecsSinceEpoch(query.value(2).toLongLong()));
+                node.setLastModificationDateTime(
+                    QDateTime::fromMSecsSinceEpoch(query.value(3).toLongLong()));
+                node.setDeletionDateTime(
+                    QDateTime::fromMSecsSinceEpoch(query.value(4).toLongLong()));
+                node.setContent(query.value(5).toString());
+                node.setNodeType(static_cast<NodeData::Type>(query.value(6).toInt()));
+                node.setParentId(query.value(7).toInt());
+                node.setRelativePosition(query.value(8).toInt());
+                node.setScrollBarPosition(query.value(9).toInt());
+                node.setAbsolutePath(query.value(10).toString());
+                node.setIsPinnedNote(static_cast<bool>(query.value(11).toInt()));
+                node.setRelativePosAN(query.value(13).toInt());
+                node.setChildNotesCount(query.value(14).toInt());
+
+                nodeList.append(node);
+            }
+        }
+        else
+        {
+            qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+        }
+    }
+
+    //遍历所有子节点
+    else
+    {
+        auto parentPath = getNodeAbsolutePath(parentID).path() + PATH_SEPARATOR;
+        query.prepare(
+            R"(SELECT )"
+            R"("id",)"
+            R"("title",)"
+            R"("creation_date",)"
+            R"("modification_date",)"
+            R"("deletion_date",)"
+            R"("content",)"
+            R"("node_type",)"
+            R"("parent_id",)"
+            R"("relative_position", )"
+            R"("scrollbar_position",)"
+            R"("absolute_path", )"
+            R"("is_pinned_note", )"
+            R"("relative_position_an", )"
+            R"("child_notes_count" )"
+            R"(FROM node_table )"
+            R"(WHERE absolute_path like (:path_expr) || '%' AND node_type = (:node_type);)");
+        query.bindValue(QStringLiteral(":path_expr"), parentPath);
+        query.bindValue(QStringLiteral(":node_type"), static_cast<int>(NodeData::Note));
+
+        bool status = query.exec();
+        if (status) {
+            while (query.next()) {
+                NodeData node;
+                node.setId(query.value(0).toInt());
+                node.setFullTitle(query.value(1).toString());
+                node.setCreationDateTime(
+                    QDateTime::fromMSecsSinceEpoch(query.value(2).toLongLong()));
+                node.setLastModificationDateTime(
+                    QDateTime::fromMSecsSinceEpoch(query.value(3).toLongLong()));
+                node.setDeletionDateTime(
+                    QDateTime::fromMSecsSinceEpoch(query.value(4).toLongLong()));
+                node.setContent(query.value(5).toString());
+                node.setNodeType(static_cast<NodeData::Type>(query.value(6).toInt()));
+                node.setParentId(query.value(7).toInt());
+                node.setRelativePosition(query.value(8).toInt());
+                node.setScrollBarPosition(query.value(9).toInt());
+                node.setAbsolutePath(query.value(10).toString());
+                node.setIsPinnedNote(static_cast<bool>(query.value(11).toInt()));
+                node.setRelativePosAN(query.value(13).toInt());
+                node.setChildNotesCount(query.value(14).toInt());
+
+                nodeList.append(node);
+            }
+        }
+        else
+        {
+            qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+        }
+    }
+
+
+    ListViewInfo inf;
+    inf.isInSearch = false;
+    inf.isInTag = false;
+    inf.parentFolderId = parentID;
+    inf.currentNotesId = { SpecialNodeID::InvalidNodeId };
+    inf.needCreateNewNote = newNote;
+    inf.scrollToId = scrollToId;
+    //根据创建时间排序
+    std::sort(nodeList.begin(), nodeList.end(), [](const NodeData &a, const NodeData &b) -> bool {
+        return a.lastModificationdateTime() > b.lastModificationdateTime();
+    });
+
+    emit notesListReceived(nodeList, inf);
+}
+
+void DBManager::onOpenDBManagerRequested(const QString &path, bool doCreate)
+{
+    this->open(path, doCreate);
+}
+
+void DBManager::onCreateUpdateRequestedNoteContent(const NodeData &note)
+{
+    //不是笔记类型(是文件夹类型)
+    if (note.nodeType() != NodeData::Note)
+    {
+        qDebug() << "Wrong node type";
+        return;
+    }
+
+    bool exists = isNodeExist(note);    //看这个节点是否存在
+
+    if (exists)
+    {
+        updateNoteContent(note);
+    }
+    else
+    {
+        addNode(note);
+    }
+}
+
+void DBManager::onImportNotesRequested(const QString &fileName)
+{
+    //打开文件
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << "fail to open file";
+        return;
+    }
+    auto magic_header = file.read(16);
+    file.close();
+
+    //如果是这个类型的数据库，就打开
+    if (QString::fromUtf8(magic_header).startsWith(QStringLiteral("SQLite format 3")))
+    {
+        qDebug() << __FUNCTION__;
+        auto outside_db = QSqlDatabase::addDatabase("QSQLITE", OUTSIDE_DATABASE_NAME);
+        outside_db.setDatabaseName(fileName);
+        if (!outside_db.open())
+        {
+            qDebug() << __FUNCTION__ << "Error: connection with database fail";
+            return;
+        }
+        else
+        {
+            qDebug() << __FUNCTION__ << "Database: connection ok";
+        }
+
+        QMap<int, int> folderIdMap, noteIdMap;
+
+
+        //查询文件夹
+        {
+            folderIdMap[SpecialNodeID::RootFolder] = SpecialNodeID::RootFolder;
+            folderIdMap[SpecialNodeID::TrashFolder] = SpecialNodeID::TrashFolder;
+            folderIdMap[SpecialNodeID::DefaultNotesFolder] = SpecialNodeID::DefaultNotesFolder;
+            QSqlQuery out_qr(outside_db);
+            //查询文件夹类型的节点
+            out_qr.prepare(R"(SELECT)"
+                           R"("id",)"
+                           R"("title",)"
+                           R"("creation_date",)"
+                           R"("modification_date",)"
+                           R"("deletion_date",)"
+                           R"("content",)"
+                           R"("node_type",)"
+                           R"("parent_id",)"
+                           R"("relative_position",)"
+                           R"("absolute_path" )"
+                           R"(FROM node_table WHERE node_type=:node_type;)");
+            out_qr.bindValue(":node_type", static_cast<int>(NodeData::Type::Folder));
+
+
+            bool status = out_qr.exec();
+            QMap<int, NodeData> nodeList;
+            if (status)
+            {
+                //根据结果一个个获取参数，然后组装成nodedata加入到nodelist
+                while (out_qr.next())
+                {
+                    NodeData node;
+                    node.setId(out_qr.value(0).toInt());
+                    node.setFullTitle(out_qr.value(1).toString());
+                    node.setCreationDateTime(
+                        QDateTime::fromMSecsSinceEpoch(out_qr.value(2).toLongLong()));
+                    node.setLastModificationDateTime(
+                        QDateTime::fromMSecsSinceEpoch(out_qr.value(3).toLongLong()));
+                    node.setDeletionDateTime(
+                        QDateTime::fromMSecsSinceEpoch(out_qr.value(4).toLongLong()));
+                    node.setContent(out_qr.value(5).toString());
+                    node.setNodeType(static_cast<NodeData::Type>(out_qr.value(6).toInt()));
+                    node.setParentId(out_qr.value(7).toInt());
+                    node.setRelativePosition(out_qr.value(8).toInt());
+                    node.setAbsolutePath(out_qr.value(9).toString());
+                    nodeList[node.id()] = node;
+                }
+
+
+
+                //查找或创建文件夹，并把id保存在foldermap中
+                auto matchFolderFunc = [&](int id, const auto &matchFolderFunctor)
+                {
+                    if (!nodeList.contains(id))   //nodelist中不包含这个id
+                    {
+                        qDebug() << __FUNCTION__ << __LINE__ << "node not found";
+                        return;
+                    }
+                    if (folderIdMap.contains(id)) //已经处理过了
+                    {
+                        return;
+                    }
+
+
+                    auto node = nodeList[id]; //获取这个节点
+
+                    //看文件夹map是否包含这节点的父节点
+                    if (folderIdMap.contains(node.parentId()))
+                    {
+                        QSqlQuery qr(m_db);
+                        //查询数据库中是否包含以下条件的id
+                        qr.prepare(
+                            R"(SELECT "id" FROM node_table WHERE title = :title AND node_type = :node_type AND parent_id = :parent_id;)");
+                        qr.bindValue(QStringLiteral(":title"), node.fullTitle());
+                        qr.bindValue(QStringLiteral(":node_type"),
+                                     static_cast<int>(NodeData::Folder));
+                        qr.bindValue(QStringLiteral(":parent_id"), folderIdMap[node.parentId()]);
+
+                        //将包含上述条件的id的查询结果添加到ids
+                        QVector<int> ids;
+                        if (qr.exec())
+                        {
+                            while (qr.next())
+                            {
+                                ids.append(qr.value(0).toInt());
+                            }
+                        }
+                        else
+                        {
+                            qDebug() << __FUNCTION__ << __LINE__ << qr.lastError();
+                        }
+                        qr.finish();
+
+                        //不为空，则将第一个添加到map
+                        if (!ids.isEmpty())
+                        {
+                            folderIdMap[id] = ids[0];
+                        }
+                        else
+                        {
+                            node.setParentId(folderIdMap[node.parentId()]);
+                            int newId = addNode(node);  //添加节点
+                            folderIdMap[id] = newId;
+                        }
+
+                    //不包含父节点
+                    }
+                    else
+                    {
+                        //将这个节点的路径分割，再来查找
+                        auto prL = NodePath(node.absolutePath()).separate();
+                        for (const auto &pr : qAsConst(prL))
+                        {
+                            matchFolderFunctor(pr.toInt(), matchFolderFunctor);
+                        }
+                    }
+                };
+
+
+                struct Folder
+                {
+                    int id;
+                    int parentId;
+                    std::vector<Folder *> children;
+                };
+
+                Folder *rootFolder = nullptr;
+                QHash<int, Folder> needImportFolderMap;
+
+
+                for (const auto &node : qAsConst(nodeList))
+                {
+                    Folder f;
+                    f.id = node.id();
+                    f.parentId = node.parentId();
+                    needImportFolderMap[node.id()] = f;
+                    if (f.id == SpecialNodeID::RootFolder)
+                    {
+                        rootFolder = &needImportFolderMap[node.id()];
+                    }
+                }
+
+                //如果根节点不为空
+                if (rootFolder)
+                {
+                    for (const auto &folder : qAsConst(needImportFolderMap))
+                    {
+                        if (folder.id != SpecialNodeID::RootFolder)
+                        {
+                            needImportFolderMap[folder.parentId].children.push_back(
+                                &needImportFolderMap[folder.id]);
+                        }
+                    }
+
+
+                    //根据节点相对位置进行排序
+                    auto sortChildFunc = [&](Folder *f)
+                    {
+                        std::sort(f->children.begin(), f->children.end(),
+                                  [&](Folder *f1, Folder *f2) {
+                                      return nodeList[f1->id].relativePosition()
+                                             < nodeList[f2->id].relativePosition();
+                                  });
+                    };
+                    //递归地对整个文件夹树排序
+                    auto sortFunc = [&](Folder *f, const auto &sf) -> void
+                    {
+                        sortChildFunc(f);
+                        for (auto c : f->children)
+                        {
+                            sf(c, sf);
+                        }
+                    };
+                    //调用函数
+                    sortFunc(rootFolder, sortFunc);
+
+
+                    //递归地调用之前定义的matchfunc处理节点
+                    auto matchFunc = [&](Folder *f, const auto &mf) -> void
+                    {
+                        matchFolderFunc(f->id, matchFolderFunc);
+                        for (auto c : f->children)
+                        {
+                            mf(c, mf);
+                        }
+                    };
+                    matchFunc(rootFolder, matchFunc);
+
+                }
+
+                //根节点为空
+                else
+                {
+                    qDebug() << __FUNCTION__ << "Error while keeping folder position";
+                    for (const auto &node : qAsConst(nodeList))
+                    {
+                        matchFolderFunc(node.id(), matchFolderFunc);
+                    }
+                }
+            }
+            else
+            {
+                qDebug() << __FUNCTION__ << __LINE__ << out_qr.lastError();
+            }
+        }
+
+
+
+        //查询笔记
+        {
+            QSqlQuery out_qr(outside_db);
+            out_qr.prepare(R"(SELECT)"
+                           R"("id",)"
+                           R"("title",)"
+                           R"("creation_date",)"
+                           R"("modification_date",)"
+                           R"("deletion_date",)"
+                           R"("content",)"
+                           R"("node_type",)"
+                           R"("parent_id",)"
+                           R"("relative_position",)"
+                           R"("scrollbar_position",)"
+                           R"("absolute_path", )"
+                           R"("is_pinned_note", )"
+                           R"("relative_position_an" )"
+                           R"(FROM node_table WHERE node_type=:node_type;)");
+
+            out_qr.bindValue(":node_type", static_cast<int>(NodeData::Type::Note));
+            bool status = out_qr.exec();
+
+            QVector<NodeData> nodeList;
+            QMap<int, std::pair<NodeData, int>> parents;
+
+
+            for (const auto &id : qAsConst(folderIdMap))
+            {
+                if (parents.contains(id))
+                {
+                    continue;
+                }
+                auto node = getNode(id);
+                auto rel = nextAvailablePosition(id, NodeData::Note);
+                parents[id] = std::make_pair(node, rel);
+            }
+
+
+            //查询结果添加到nodelist
+            if (status)
+            {
+                while (out_qr.next())
+                {
+                    NodeData node;
+                    node.setId(out_qr.value(0).toInt());
+                    node.setFullTitle(out_qr.value(1).toString());
+                    node.setCreationDateTime(
+                        QDateTime::fromMSecsSinceEpoch(out_qr.value(2).toLongLong()));
+                    node.setLastModificationDateTime(
+                        QDateTime::fromMSecsSinceEpoch(out_qr.value(3).toLongLong()));
+                    node.setDeletionDateTime(
+                        QDateTime::fromMSecsSinceEpoch(out_qr.value(4).toLongLong()));
+                    node.setContent(out_qr.value(5).toString());
+                    node.setNodeType(static_cast<NodeData::Type>(out_qr.value(6).toInt()));
+                    node.setParentId(out_qr.value(7).toInt());
+                    node.setRelativePosition(out_qr.value(8).toInt());
+                    node.setScrollBarPosition(out_qr.value(9).toInt());
+                    node.setAbsolutePath(out_qr.value(10).toString());
+                    node.setIsPinnedNote(static_cast<bool>(out_qr.value(11).toInt()));
+                    node.setRelativePosAN(out_qr.value(13).toInt());
+                    node.setChildNotesCount(out_qr.value(14).toInt());
+
+                    nodeList.append(node);
+                }
+
+                //开启事务
+                m_db.transaction();
+                auto nodeId = nextAvailableNodeId();
+                //将节点添加到数据库中
+                for (auto node : qAsConst(nodeList))
+                {
+                    if (folderIdMap.contains(node.parentId())
+                        && parents.contains(folderIdMap[node.parentId()]))
+                    {
+                        auto parentId = folderIdMap[node.parentId()];
+                        auto parent = parents[parentId].first;
+                        auto oldId = node.id();
+                        node.setId(nodeId);
+                        node.setRelativePosition(parents[parentId].second);
+                        node.setAbsolutePath(parent.absolutePath() + PATH_SEPARATOR
+                                             + QString::number(nodeId));
+                        node.setParentId(parentId);
+                        addNodePreComputed(node);   //添加
+                        ++nodeId;
+                        parents[parentId].second = node.relativePosition() + 1;
+                        noteIdMap[oldId] = node.id();
+                    }
+                    else
+                    {
+                        qDebug() << __FUNCTION__ << __LINE__ << "can't find parent for note";
+                    }
+                }
+
+                //更新数据库
+                QSqlQuery query(m_db);
+                query.prepare(
+                    R"(UPDATE "metadata" SET "value"=:value WHERE "key"='next_node_id';)");
+                query.bindValue(":value", nodeId + 1);
+                if (!query.exec())
+                {
+                    qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+                }
+                m_db.commit();
+
+            }
+            else
+            {
+                qDebug() << __FUNCTION__ << __LINE__ << out_qr.lastError();
+            }
+        }
+
+        {
+            outside_db.close();
+            outside_db = QSqlDatabase::database();
+        }
+    }
+    //不是sqlite的数据库
+    else
+    {
+        auto noteList = readOldNBK(fileName);
+        if (noteList.isEmpty())
+        {
+            emit showErrorMessage(tr("Invalid file"), "Please select a valid notes export file");
+        }
+        else
+        {
+            auto defaultNoteFolder = getNode(SpecialNodeID::DefaultNotesFolder);
+            int nodeId = nextAvailableNodeId();
+            int notePos = nextAvailablePosition(defaultNoteFolder.id(), NodeData::Note);
+            QString parentAbsPath = defaultNoteFolder.absolutePath();
+
+
+            m_db.transaction();
+            for (auto &note : noteList)
+            {
+                note.setId(nodeId);
+                note.setRelativePosition(notePos);
+                note.setAbsolutePath(parentAbsPath + PATH_SEPARATOR + QString::number(nodeId));
+                note.setNodeType(NodeData::Note);
+                note.setParentId(SpecialNodeID::DefaultNotesFolder);
+                note.setParentName("Notes");
+                note.setIsTempNote(false);
+                addNodePreComputed(note);  //这里添加到数据库
+                ++nodeId;
+                ++notePos;
+            }
+
+
+            QSqlQuery query(m_db);
+            query.prepare(R"(UPDATE "metadata" SET "value"=:value WHERE "key"='next_node_id';)");
+            query.bindValue(":value", nodeId + 1);
+            if (!query.exec())
+            {
+                qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+            }
+
+            m_db.commit();
+        }
+    }
+
+    //改变了，重新计算子节点数量
+    recalculateChildNotesCount();
+}
+
+void DBManager::onRestoreNotesRequested(const QString &fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << "fail to open file";
+        return;
+    }
+    auto magic_header = file.read(16);
+    file.close();
+
+    //如果是sqlite数据库
+    if (QString::fromUtf8(magic_header).startsWith(QStringLiteral("SQLite format 3")))
+    {
+        //关闭数据库连接
+        {
+            m_db.close();
+            m_db = QSqlDatabase::database();
+        }
+        //删除已有数据库文件
+        QSqlDatabase::removeDatabase(DEFAULT_DATABASE_NAME);
+        QFile::remove(m_dbpath);
+        //打开指定位置的数据库
+        if (!QFile::copy(fileName, m_dbpath))
+        {
+            qDebug() << __FUNCTION__ << "Can't import notes";
+        };
+        open(m_dbpath, false);
+    }
+
+    else
+    {
+        auto noteList = readOldNBK(fileName);
+        if (noteList.isEmpty())//是否读取成功
+        {
+            emit showErrorMessage(tr("Invalid file"), "Please select a valid notes export file");
+        }
+        else
+        {
+            //创建新的数据库和表
+            {
+                m_db.close();
+                m_db = QSqlDatabase::database();
+            }
+            QSqlDatabase::removeDatabase(DEFAULT_DATABASE_NAME);
+            QFile::remove(m_dbpath);
+            open(m_dbpath, true);
+
+            //找到默认的笔记文件夹节点
+            auto defaultNoteFolder = getNode(SpecialNodeID::DefaultNotesFolder);
+            int nodeId = nextAvailableNodeId();
+            int notePos = nextAvailablePosition(defaultNoteFolder.id(), NodeData::Note);
+            QString parentAbsPath = defaultNoteFolder.absolutePath();
+
+            //将list中的节点添加到数据库
+            m_db.transaction();
+            for (auto &note : noteList)
+            {
+                note.setId(nodeId);
+                note.setRelativePosition(notePos);
+                note.setAbsolutePath(parentAbsPath + PATH_SEPARATOR + QString::number(nodeId));
+                note.setNodeType(NodeData::Note);
+                note.setParentId(defaultNoteFolder.id());
+                note.setParentName("Notes");
+                note.setIsTempNote(false);
+                addNodePreComputed(note);
+                ++nodeId;
+                ++notePos;
+            }
+
+            QSqlQuery query(m_db);
+            query.prepare(R"(UPDATE "metadata" SET "value"=:value WHERE "key"='next_node_id';)");
+            query.bindValue(":value", nodeId + 1);
+            if (!query.exec())
+            {
+                qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+            }
+
+            m_db.commit();
+        }
+    }
+
+    recalculateChildNotesCount();
+}
+
+void DBManager::onExportNotesRequested(const QString &fileName)
+{
+    //锁
+    QSqlQuery query(m_db);
+    query.prepare("BEGIN IMMEDIATE;");
+    bool status = query.exec();
+    if (!status)
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
+    QFile::remove(fileName);//确保导出前文件是空的
+
+    //将数据库文件导出到file中
+    if (!QFile::copy(m_dbpath, fileName))
+    {
+        qDebug() << __FUNCTION__ << "Can't export notes";
+    };
+
+    //回滚
+    query.prepare("ROLLBACK;");
+    status = query.exec();
+    if (!status)
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
+}
+
+
+void DBManager::onChangeDatabasePathRequested(const QString &newPath)
+{
+    {
+        m_db.commit();
+        m_db.close();
+        m_db = QSqlDatabase::database();
+    }
+    QFile::rename(m_dbpath, newPath);
+    open(newPath, false);
+}
+
 void DBManager::increaseChildNotesCountFolder(int folderId)
 {
     QSqlQuery query(m_db);
@@ -508,7 +1255,7 @@ bool DBManager::isNodeExist(const NodeData &node)
 {
     QSqlQuery query(m_db);
 
-    //判断id是否存在,在数据库中查询
+    //判断id是否存在,在数据库中查询，根据id因为id唯一
     int id = node.id();
     QString queryStr =      //select exists表示是否存在
         QStringLiteral("SELECT EXISTS(SELECT 1 FROM node_table WHERE id = :id LIMIT 1 )");
@@ -753,7 +1500,7 @@ int DBManager::addNodePreComputed(const NodeData &node)
     query.bindValue(":relative_position_an", node.relativePosAN());
     query.bindValue(":child_notes_count", node.childNotesCount());
 
-    //查询
+    //真正实施插入
     bool status = query.exec();
     if (!status)
     {

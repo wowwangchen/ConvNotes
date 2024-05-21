@@ -66,7 +66,8 @@ void MainWindow::setupModelView()
     m_listView=ui->filesListView;
     //文件夹树形结构
     m_treeView = static_cast<myTreeView*>(ui->allPackageTreeView);
-
+    if(m_treeModel==nullptr)
+        qDebug()<<__FUNCTION__<<"error";
     //m_treeView->setModel(m_treeModel);
     //m_treeViewLogic = new myTreeViewLogic(m_treeView, m_treeModel, m_dbManager, m_listView, this);
 }

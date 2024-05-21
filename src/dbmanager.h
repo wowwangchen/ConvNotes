@@ -14,11 +14,23 @@
 #include"nodepath.h"
 
 #define DEFAULT_DATABASE_NAME "default_database"
+#define OUTSIDE_DATABASE_NAME "outside_database"
 
 struct NodeTagTreeData
 {
     QVector<NodeData> nodeTreeData;
     //QVector<TagData> tagTreeData;
+};
+
+struct ListViewInfo
+{
+    bool        isInSearch;
+    bool        isInTag;
+    QSet<int>   currentTagList;
+    int         parentFolderId;
+    QSet<int>   currentNotesId;
+    bool        needCreateNewNote;
+    int         scrollToId;
 };
 
 using FolderListType = QMap<int, QString>;
@@ -63,24 +75,52 @@ private:
     QVector<NodeData> getAllFolders();
     //更新某个节点(相关参数)
     bool updateNoteContent(const NodeData &note);
-    //获取旧版本的notebook
+    //获取旧版本的notebook，直接以字符流的形式读取
     QList<NodeData> readOldNBK(const QString &fileName);
     //为新的子节点获取下一个可用的位置
     int nextAvailablePosition(int parentId, NodeData::Type nodeType);
-    //在数据库中添加一条记录
+    //在数据库中添加一条预先处理好的节点数据
     int addNodePreComputed(const NodeData &node);
 
 signals:
     void nodesTagTreeReceived(const NodeTagTreeData &treeData);
     void childNotesCountUpdatedFolder(int folderId, const QString &path, int childCount);
+    void notesListReceived(const QVector<NodeData> &noteList, const ListViewInfo &inf);
+    void showErrorMessage(const QString &title, const QString &content);
 
 
 public slots:
+    //在数据库中重命名节点
     void renameNode(int id, const QString &newName);
+    //在数据库中移动节点位置
     void moveNode(int nodeId, const NodeData &target);
+    //更新节点的位置
     void updateRelPosNode(int nodeId, int relPos);
+    //添加节点(很多参数都未确定，要在函数中确定,前面的addNodePreComputed的参数都是确定好的)
     int addNode(const NodeData &node);
+    //下一个可用的节点的数据库中的id的值
     int nextAvailableNodeId();
+    //获得笔记列表
+    void onNotesListInFolderRequested(int parentID, bool isRecursive, bool newNote = false,
+                                      int scrollToId = SpecialNodeID::InvalidNodeId);
+    //打开数据库
+    void onOpenDBManagerRequested(const QString &path, bool doCreate);
+    //创建或者更新某个节点
+    void onCreateUpdateRequestedNoteContent(const NodeData &note);
+    //从外部文件中导入笔记
+    void onImportNotesRequested(const QString &fileName);
+    //从指定文件中恢复笔记
+    void onRestoreNotesRequested(const QString &fileName);
+    //导出笔记
+    void onExportNotesRequested(const QString &fileName);
+    //版本间迁移数据
+    //void onMigrateNotesFromV0_9_0Requested(QVector<NodeData> &noteList);
+    //void onMigrateTrashFrom0_9_0Requested(QVector<NodeData> &noteList);
+    //void onMigrateNotesFrom1_5_0Requested(const QString &fileName);
+    //修改数据库的路径
+    void onChangeDatabasePathRequested(const QString &newPath);
+
+
 
 private:
     QString      m_dbpath;      //数据库存储的路径
