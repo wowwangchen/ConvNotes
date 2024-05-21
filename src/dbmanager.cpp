@@ -7,22 +7,156 @@ DBManager::DBManager(QObject *parent) : QObject(parent)
 
 NodePath DBManager::getNodeAbsolutePath(int nodeId)
 {
-    return NodePath("");
+    //查询指定id的绝对路径
+    QSqlQuery query(m_db);
+    query.prepare("SELECT absolute_path FROM node_table WHERE id = :id");
+    query.bindValue(":id", nodeId);
+    bool status = query.exec();
+    if (!status)
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError() << query.isValid();
+    }
+
+    query.last();  //只返回一条记录的查询，等价于next
+    auto absolutePath = query.value(0).toString();
+
+    return absolutePath;
 }
 
 NodeData DBManager::getNode(int nodeId)
 {
-    return NodeData{};
+    //查询
+    QSqlQuery query(m_db);
+    query.prepare(R"(SELECT)"
+                  R"("id",)"
+                  R"("title",)"
+                  R"("creation_date",)"
+                  R"("modification_date",)"
+                  R"("deletion_date",)"
+                  R"("content",)"
+                  R"("node_type",)"
+                  R"("parent_id",)"
+                  R"("relative_position",)"
+                  R"("scrollbar_position",)"
+                  R"("absolute_path", )"
+                  R"("is_pinned_note", )"
+                  R"("relative_position_an", )"
+                  R"("child_notes_count" )"
+                  R"(FROM node_table WHERE id=:id LIMIT 1;)");
+    query.bindValue(":id", nodeId);
+    bool status = query.exec();
+
+    if (status)
+    {
+        //设置参数
+        query.next();
+        NodeData node;
+        node.setId(query.value(0).toInt());
+        node.setFullTitle(query.value(1).toString());
+        node.setCreationDateTime(QDateTime::fromMSecsSinceEpoch(query.value(2).toLongLong()));
+        node.setLastModificationDateTime(
+            QDateTime::fromMSecsSinceEpoch(query.value(3).toLongLong()));
+        node.setDeletionDateTime(QDateTime::fromMSecsSinceEpoch(query.value(4).toLongLong()));
+        node.setContent(query.value(5).toString());
+        node.setNodeType(static_cast<NodeData::Type>(query.value(6).toInt()));
+        node.setParentId(query.value(7).toInt());
+        node.setRelativePosition(query.value(8).toInt());
+        node.setScrollBarPosition(query.value(9).toInt());
+        node.setAbsolutePath(query.value(10).toString());
+        node.setIsPinnedNote(static_cast<bool>(query.value(11).toInt()));
+        node.setRelativePosAN(query.value(13).toInt());
+        node.setRelativePosAN(query.value(14).toInt());
+
+        return node;
+    }
+
+    else
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
+    qDebug() << "Can't find node with id" << nodeId;
+    return NodeData();
 }
 
 void DBManager::moveFolderToTrash(const NodeData &node)
 {
+    //查询节点对应的数据库中的id，其中路径是包含这个节点的路径即可(即包括子节点)
+    QSqlQuery query(m_db);
+    QString parentPath = node.absolutePath() + PATH_SEPARATOR;
+    query.prepare(R"(SELECT id FROM "node_table" )"
+                  R"(WHERE absolute_path like (:path_expr) || '%' AND node_type = (:node_type);)");
+    query.bindValue(QStringLiteral(":path_expr"), parentPath);
+    query.bindValue(QStringLiteral(":node_type"), static_cast<int>(NodeData::Note));
+    bool status = query.exec();
+    QSet<int> childIds;
+    if (status)
+    {
+        while (query.next())
+        {
+            childIds.insert(query.value(0).toInt());
+        }
+    }
+    else
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
+    query.clear();
 
+    //将节点加入垃圾桶节点
+    auto trashFolder = getNode(SpecialNodeID::TrashFolder);
+    for (const auto &id : childIds)
+    {
+        moveNode(id, trashFolder);
+    }
+
+
+    //从节点表中删除节点的子节点
+    query.prepare(R"(DELETE FROM "node_table" )"
+                  R"(WHERE absolute_path like (:path_expr) || '%' AND node_type = (:node_type);)");
+    query.bindValue(QStringLiteral(":path_expr"), parentPath);
+    query.bindValue(QStringLiteral(":node_type"), static_cast<int>(NodeData::Folder));
+    status = query.exec();
+    if (!status)
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
+    query.clear();
+
+    //从表中删除这个节点
+    query.prepare(R"(DELETE FROM "node_table" )"
+                  R"(WHERE absolute_path like (:path_expr) AND node_type = (:node_type);)");
+    query.bindValue(QStringLiteral(":path_expr"), node.absolutePath());
+    query.bindValue(QStringLiteral(":node_type"), static_cast<int>(NodeData::Folder));
+    status = query.exec();
+    if (!status)
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
 }
 
 FolderListType DBManager::getFolderList()
 {
-    return FolderListType{};
+
+    //获取id和文件夹名称的map并返回
+    QMap<int, QString> result;
+    QSqlQuery query(m_db);
+    query.prepare(
+        R"(SELECT "id", "title" FROM node_table WHERE id > 0 AND node_type = :node_type;)");
+    query.bindValue(":node_type", NodeData::Folder);
+    bool status = query.exec();
+    if (status)
+    {
+        while (query.next())
+        {
+            result[query.value(0).toInt()] = query.value(1).toString();
+        }
+    }
+    else
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
+
+    return result;
 }
 
 void DBManager::open(const QString &path, bool doCreate)
@@ -173,7 +307,146 @@ void DBManager::createTables()
 
 void DBManager::recalculateChildNotesCount()
 {
+    //查询所有文件件类型的节点的id、绝对路径
+    QSqlQuery query;
+    bool status;
+    QMap<int, QString> folderIds;
+    query.prepare(R"(SELECT id, absolute_path )"
+                  R"(FROM node_table WHERE node_type=:node_type;)");
+    query.bindValue(":node_type", static_cast<int>(NodeData::Type::Folder));
+    status = query.exec();
+    if (status)
+    {
+        while (query.next())
+        {
+            auto id = query.value(0).toInt();
+            if (id != SpecialNodeID::RootFolder) //除根节点外
+            {
+                folderIds[id] = query.value(1).toString();
+            }
+        }
+    }
+    else
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
 
+    //遍历之前查找的所有结果
+    for (const auto &id : folderIds.keys())
+    {
+        //查询当前遍历的id的子笔记的数量
+        query.prepare(R"(SELECT count(*) FROM node_table )"
+                      R"(WHERE node_type = (:node_type) AND parent_id = (:parent_id);)");
+        query.bindValue(QStringLiteral(":parent_id"), id);
+        query.bindValue(QStringLiteral(":node_type"), static_cast<int>(NodeData::Note));
+        status = query.exec();
+        int childNotesCount = 0;
+        if (status)
+        {
+            query.next();
+            childNotesCount = query.value(0).toInt();
+        }
+        else
+        {
+            qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+        }
+        query.clear();
+
+        //更新笔记数量
+        query.prepare(QStringLiteral("UPDATE node_table SET child_notes_count = :child_notes_count "
+                                     "WHERE id = :id"));
+        query.bindValue(QStringLiteral(":id"), id);
+        query.bindValue(QStringLiteral(":child_notes_count"), childNotesCount);
+        status = query.exec();
+        if (!status)
+        {
+            qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+        }
+
+        //发送更新文件夹子笔记数量的信号
+        emit childNotesCountUpdatedFolder(id, folderIds[id], childNotesCount);
+    }
+
+
+    recalculateChildNotesCountAllNotes();
+}
+
+void DBManager::recalculateChildNotesCountAllNotes()
+{
+    //查询所有不在垃圾桶节点的子节点数量
+    QSqlQuery query(m_db);
+    query.prepare(R"(SELECT count(*) FROM node_table )"
+                  R"(WHERE node_type = (:node_type) AND parent_id != (:parent_id);)");
+    query.bindValue(QStringLiteral(":node_type"), static_cast<int>(NodeData::Note));
+    query.bindValue(QStringLiteral(":parent_id"), static_cast<int>(SpecialNodeID::TrashFolder));
+    bool status = query.exec();
+    int childNotesCount = 0;
+    if (status)
+    {
+        query.next();
+        childNotesCount = query.value(0).toInt();
+    }
+    else
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
+    query.clear();
+
+
+    //更新到根节点的子节点数量
+    query.prepare(QStringLiteral("UPDATE node_table SET child_notes_count = :child_notes_count "
+                                 "WHERE id = :id"));
+    query.bindValue(QStringLiteral(":id"), SpecialNodeID::RootFolder);
+    query.bindValue(QStringLiteral(":child_notes_count"), childNotesCount);
+    status = query.exec();
+    if (!status)
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
+
+    //子节点数量改变的信号
+    emit childNotesCountUpdatedFolder(SpecialNodeID::RootFolder,
+                                      getNodeAbsolutePath(SpecialNodeID::RootFolder).path(),
+                                      childNotesCount);
+}
+
+void DBManager::recalculateChildNotesCountFolder(int folderId)
+{
+    //查询节点类型是笔记，父节点是给定id的节点
+    QSqlQuery query(m_db);
+    query.prepare(R"(SELECT count(*) FROM node_table )"
+                  R"(WHERE node_type = (:node_type) AND parent_id = (:parent_id);)");
+    query.bindValue(QStringLiteral(":parent_id"), folderId);
+    query.bindValue(QStringLiteral(":node_type"), static_cast<int>(NodeData::Note));
+    bool status = query.exec();
+    int childNotesCount = 0;
+    if (status)
+    {
+        query.next();
+        childNotesCount = query.value(0).toInt();
+    }
+    else
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
+    query.clear();
+
+
+    //更新
+    query.prepare(QStringLiteral("UPDATE node_table SET child_notes_count = :child_notes_count "
+                                 "WHERE id = :id"));
+    query.bindValue(QStringLiteral(":id"), folderId);
+    query.bindValue(QStringLiteral(":child_notes_count"), childNotesCount);
+    status = query.exec();
+    if (!status)
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
+
+
+    //发送更新完成信号
+    emit childNotesCountUpdatedFolder(folderId, getNodeAbsolutePath(folderId).path(),
+                                      childNotesCount);
 }
 
 int DBManager::nextAvailableNodeId()
@@ -186,14 +459,16 @@ void DBManager::increaseChildNotesCountFolder(int folderId)
     QSqlQuery query(m_db);
     query.prepare(R"(SELECT child_notes_count, absolute_path  FROM "node_table" WHERE id=:id)");
     query.bindValue(QStringLiteral(":id"), folderId);
+
     bool status = query.exec();
     int childNotesCount = 0;
     QString absPath;
+    //获取文件夹的位置
     if (status)
     {
         query.next();
-        childNotesCount = query.value(0).toInt();
-        absPath = query.value(1).toString();
+        childNotesCount = query.value(0).toInt();  //子节点数
+        absPath = query.value(1).toString();       //绝对路径
     }
     else
     {
@@ -201,22 +476,292 @@ void DBManager::increaseChildNotesCountFolder(int folderId)
         return;
     }
     query.clear();
-    childNotesCount += 1;
+
+
+
+    //更新
+    childNotesCount += 1;  //子节点数+1
 
     query.prepare(QStringLiteral("UPDATE node_table SET child_notes_count = :child_notes_count "
                                  "WHERE id = :id"));
     query.bindValue(QStringLiteral(":id"), folderId);
     query.bindValue(QStringLiteral(":child_notes_count"), childNotesCount);
     status = query.exec();
-    if (!status) {
+    if (!status) //不成功
+    {
         qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
     }
+
+
+
+    //发送信号，文件夹子节点更新，让model等其他对象更新
     emit childNotesCountUpdatedFolder(folderId, absPath, childNotesCount);
+
 }
 
 void DBManager::decreaseChildNotesCountFolder(int folderId)
 {
 
+}
+
+bool DBManager::isNodeExist(const NodeData &node)
+{
+    QSqlQuery query(m_db);
+
+    //判断id是否存在,在数据库中查询
+    int id = node.id();
+    QString queryStr =      //select exists表示是否存在
+        QStringLiteral("SELECT EXISTS(SELECT 1 FROM node_table WHERE id = :id LIMIT 1 )");
+    query.prepare(queryStr);
+    query.bindValue(":id", id);
+    bool status = query.exec();
+    if (!status)
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError() << query.isValid();
+    }
+
+    query.next();
+    return query.value(0).toInt() == 1; //是否为1，因为查询如果有的话返回1
+}
+
+QVector<NodeData> DBManager::getAllFolders()
+{
+    QVector<NodeData> nodeList;
+
+    //查询文件夹类型的节点的数据
+    QSqlQuery query(m_db);
+    query.prepare(R"(SELECT)"
+                  R"("id",)"
+                  R"("title",)"
+                  R"("creation_date",)"
+                  R"("modification_date",)"
+                  R"("deletion_date",)"
+                  R"("content",)"
+                  R"("node_type",)"
+                  R"("parent_id",)"
+                  R"("relative_position",)"
+                  R"("absolute_path", )"
+                  R"("child_notes_count" )"
+                  R"(FROM node_table WHERE node_type=:node_type;)");
+    query.bindValue(":node_type", static_cast<int>(NodeData::Type::Folder));
+
+
+    bool status = query.exec();
+    if (status)
+    {
+        //一直查询，设置参数，然后返回节点
+        while (query.next())
+        {
+            NodeData node;
+            node.setId(query.value(0).toInt());
+            node.setFullTitle(query.value(1).toString());
+            node.setCreationDateTime(QDateTime::fromMSecsSinceEpoch(query.value(2).toLongLong()));
+            node.setLastModificationDateTime(
+                QDateTime::fromMSecsSinceEpoch(query.value(3).toLongLong()));
+            node.setDeletionDateTime(QDateTime::fromMSecsSinceEpoch(query.value(4).toLongLong()));
+            node.setContent(query.value(5).toString());
+            node.setNodeType(static_cast<NodeData::Type>(query.value(6).toInt()));
+            node.setParentId(query.value(7).toInt());
+            node.setRelativePosition(query.value(8).toInt());
+            node.setAbsolutePath(query.value(9).toString());
+            node.setChildNotesCount(query.value(10).toInt());
+            //添加
+            nodeList.append(node);
+        }
+    }
+    else
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
+    //返回所查的列表
+    return nodeList;
+}
+
+bool DBManager::updateNoteContent(const NodeData &note)
+{
+    QSqlQuery query(m_db);
+    QString emptyStr;
+
+    int id = note.id();
+    //节点不合法直接返回
+    if (id == SpecialNodeID::InvalidNodeId)
+    {
+        qDebug() << "Invalid Note ID";
+        return false;
+    }
+
+    //节点的参数
+    qint64 epochTimeDateModified = note.lastModificationdateTime().toMSecsSinceEpoch();
+    QString content = note.content().replace(QChar('\x0'), emptyStr);
+    QString fullTitle = note.fullTitle().replace(QChar('\x0'), emptyStr);
+
+    //更新节点
+    query.prepare(QStringLiteral(
+        "UPDATE node_table SET modification_date = :modification_date, content = :content, "
+        "title = :title, scrollbar_position = :scrollbar_position WHERE id = :id AND node_type "
+        "= :node_type;"));
+    query.bindValue(QStringLiteral(":modification_date"), epochTimeDateModified);
+    query.bindValue(QStringLiteral(":content"), content);
+    query.bindValue(QStringLiteral(":title"), fullTitle);
+    query.bindValue(QStringLiteral(":scrollbar_position"), note.scrollBarPosition());
+    query.bindValue(QStringLiteral(":id"), id);
+    query.bindValue(QStringLiteral(":node_type"), static_cast<int>(NodeData::Note));
+
+    if (!query.exec())
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
+
+    return (query.numRowsAffected() == 1);  //返回是否更新成功
+}
+
+QList<NodeData> DBManager::readOldNBK(const QString &fileName)
+{
+    QList<NodeData> noteList;
+
+    //根据传入的文件名，获取这个文件的数据流
+    {
+        QFile file(fileName);
+        file.open(QIODevice::ReadOnly);
+        QDataStream in(&file);
+        in.setVersion(QDataStream::Qt_5_12);
+
+        try
+        {
+            in >> noteList; //输入到list中
+        }
+        catch (...)
+        {
+            // Any exception deserializing will result in an empty note list and  the user will be
+            // notified
+        }
+        file.close();
+    }
+
+    //如果list为空，那么不用普通的nodedata，而是创建一个nodedata指针类型的list
+    if (noteList.isEmpty())
+    {
+        QFile file(fileName);
+        file.open(QIODevice::ReadOnly);
+        QDataStream in(&file);
+        in.setVersion(QDataStream::Qt_5_12);
+
+        QList<NodeData *> nl;
+
+        try
+        {
+            in >> nl;
+        }
+        catch (...)
+        {
+            // Any exception deserializing will result in an empty note list and  the user will be
+            // notified
+        }
+
+        if (!nl.isEmpty()) //不为空，就从nl中一个个传到之前list中
+        {
+            for (const auto &n : qAsConst(nl))
+            {
+                noteList.append(*n);
+            }
+        }
+        qDeleteAll(nl); //释放内从
+        file.close();
+    }
+
+    return noteList;
+}
+
+int DBManager::nextAvailablePosition(int parentId, NodeData::Type nodeType)
+{
+    QSqlQuery query(m_db);
+    int relationalPosition = 0;
+
+    //查询父节点的所有子节点的相对位置
+    if (parentId != -1)
+    {
+        query.prepare(R"(SELECT relative_position FROM "node_table" )"
+                      R"(WHERE parent_id = :parent_id AND node_type = :node_type;)");
+        query.bindValue(":parent_id", parentId);
+        query.bindValue(":node_type", static_cast<int>(nodeType));
+        bool status = query.exec();
+        if (status)
+        {
+            while (query.next())
+            {
+                if (relationalPosition <= query.value(0).toInt())
+                {
+                    relationalPosition = query.value(0).toInt() + 1;
+                }
+            }
+        }
+        else
+        {
+            qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+        }
+        query.finish();
+    }
+
+    return relationalPosition;
+}
+
+int DBManager::addNodePreComputed(const NodeData &node)
+{
+    QSqlQuery query(m_db);
+    QString emptyStr;
+
+    //相关信息
+    qint64 epochTimeDateCreated = node.creationDateTime().toMSecsSinceEpoch();
+    QString content = node.content().replace("'", "''").replace(QChar('\x0'), emptyStr);
+    QString fullTitle = node.fullTitle().replace("'", "''").replace(QChar('\x0'), emptyStr);
+
+    qint64 epochTimeDateLastModified = node.lastModificationdateTime().isNull()
+                                           ? epochTimeDateCreated
+                                           : node.lastModificationdateTime().toMSecsSinceEpoch();
+
+    int relationalPosition = node.relativePosition();
+    int nodeId = node.id();
+    QString absolutePath = node.absolutePath();
+
+    //插入新的信息
+    QString queryStr =
+        R"(INSERT INTO "node_table" )"
+        R"(("id", "title", "creation_date", "modification_date", "deletion_date", "content", "node_type", "parent_id", "relative_position", "scrollbar_position", "absolute_path", "is_pinned_note", "relative_position_an", "child_notes_count") )"
+        R"(VALUES (:id, :title, :creation_date, :modification_date, :deletion_date, :content, :node_type, :parent_id, :relative_position, :scrollbar_position, :absolute_path, :is_pinned_note, :relative_position_an, :child_notes_count);)";
+
+    //绑定相关参数
+    query.prepare(queryStr);
+    query.bindValue(":id", nodeId);
+    query.bindValue(":title", fullTitle);
+    query.bindValue(":creation_date", epochTimeDateCreated);
+    query.bindValue(":modification_date", epochTimeDateLastModified);
+    if (node.deletionDateTime().isNull())
+    {
+        query.bindValue(":deletion_date", -1);
+    }
+    else
+    {
+        query.bindValue(":deletion_date", node.deletionDateTime().toMSecsSinceEpoch());
+    }
+    query.bindValue(":content", content);
+    query.bindValue(":node_type", static_cast<int>(node.nodeType()));
+    query.bindValue(":parent_id", node.parentId());
+    query.bindValue(":relative_position", relationalPosition);
+    query.bindValue(":scrollbar_position", node.scrollBarPosition());
+    query.bindValue(":absolute_path", absolutePath);
+    query.bindValue(":is_pinned_note", node.isPinnedNote() ? 1 : 0);
+    query.bindValue(":relative_position_an", node.relativePosAN());
+    query.bindValue(":child_notes_count", node.childNotesCount());
+
+    //查询
+    bool status = query.exec();
+    if (!status)
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError() << query.isValid();
+    }
+    query.finish();
+
+    return nodeId;
 }
 
 void DBManager::renameNode(int id, const QString &newName)

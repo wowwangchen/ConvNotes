@@ -30,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
     //m_dbManager=new DBManager;
 
     setupMainWindow();
-    //setupModelView();
+    setupModelView();
     initWindow();
     initConnect();
 }
@@ -66,8 +66,9 @@ void MainWindow::setupModelView()
     m_listView=ui->filesListView;
     //文件夹树形结构
     m_treeView = static_cast<myTreeView*>(ui->allPackageTreeView);
-    m_treeView->setModel(m_treeModel);
-    m_treeViewLogic = new myTreeViewLogic(m_treeView, m_treeModel, m_dbManager, m_listView, this);
+
+    //m_treeView->setModel(m_treeModel);
+    //m_treeViewLogic = new myTreeViewLogic(m_treeView, m_treeModel, m_dbManager, m_listView, this);
 }
 
 void MainWindow::initWindow()

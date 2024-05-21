@@ -8,6 +8,7 @@
 #include<QMouseEvent>
 #include<QObject>
 #include<QEvent>
+#include<QDebug>
 #include"mytreeview.h"
 #include"mytreeviewlogic.h"
 #include"mytreeviewmodel.h"
