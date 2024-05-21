@@ -90,16 +90,10 @@ signals:
 
 
 public slots:
-    //在数据库中重命名节点
-    void renameNode(int id, const QString &newName);
-    //在数据库中移动节点位置
-    void moveNode(int nodeId, const NodeData &target);
-    //更新节点的位置
-    void updateRelPosNode(int nodeId, int relPos);
     //添加节点(很多参数都未确定，要在函数中确定,前面的addNodePreComputed的参数都是确定好的)
     int addNode(const NodeData &node);
-    //下一个可用的节点的数据库中的id的值
-    int nextAvailableNodeId();
+    //移除节点
+    void removeNote(const NodeData &note);
     //获得笔记列表
     void onNotesListInFolderRequested(int parentID, bool isRecursive, bool newNote = false,
                                       int scrollToId = SpecialNodeID::InvalidNodeId);
@@ -113,13 +107,31 @@ public slots:
     void onRestoreNotesRequested(const QString &fileName);
     //导出笔记
     void onExportNotesRequested(const QString &fileName);
+    //修改数据库的路径
+    void onChangeDatabasePathRequested(const QString &newPath);
+    //下一个可用的节点的数据库中的id的值
+    int nextAvailableNodeId();
+    //在数据库中重命名节点
+    void renameNode(int id, const QString &newName);
+    //在数据库中移动节点位置
+    void moveNode(int nodeId, const NodeData &target);
+    //寻找带有关键字的节点
+    void searchForNotes(const QString &keyword, const ListViewInfo &inf);
+    //取消搜索
+    void clearSearch(const ListViewInfo &inf);
+    //更新节点的相对位置
+    void updateRelPosNode(int nodeId, int relPos);
+    //更新笔记节点的相对位置
+    void updateRelPosPinnedNote(int nodeId, int relPos);
+    void updateRelPosPinnedNoteAN(int nodeId, int relPos);
+    //设置笔记置顶状态
+    void setNoteIsPinned(int noteId, bool isPinned);
+    //获取某个文件夹的子节点数量
+    NodeData getChildNotesCountFolder(int folderId);
     //版本间迁移数据
     //void onMigrateNotesFromV0_9_0Requested(QVector<NodeData> &noteList);
     //void onMigrateTrashFrom0_9_0Requested(QVector<NodeData> &noteList);
     //void onMigrateNotesFrom1_5_0Requested(const QString &fileName);
-    //修改数据库的路径
-    void onChangeDatabasePathRequested(const QString &newPath);
-
 
 
 private:
