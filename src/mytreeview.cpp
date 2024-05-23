@@ -1,14 +1,63 @@
 ﻿#include "mytreeview.h"
 
-myTreeView::myTreeView(QWidget* parent) : QTreeView(parent)
+myTreeView::myTreeView(QWidget* parent) : QTreeView(parent),
+    m_isEditing{ false },
+    m_isContextMenuOpened{ false },
+    m_isLastSelectedFolder{ false },
+    m_ignoreThisCurrentLoad{ false }
 {
 
+    //相关设置
     setHeaderHidden(true);
     setRootIsDecorated(false);
     setMouseTracking(true);
-
+    //滚动条
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+
+    //菜单
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, &QWidget::customContextMenuRequested, this, &myTreeView::onCustomContextMenu);
+    contextMenu = new QMenu(this);
+    contextMenu->setStyleSheet("QMenu { background-color: rgb(240, 240, 240); }");
+    //重命名文件夹动作
+    renameFolderAction = new QAction(tr("Rename Folder"), this);
+    connect(renameFolderAction, &QAction::triggered, this, [this] {
+        setIsEditing(true);
+        emit renameFolderRequested();
+    });
+    //删除文件夹动作
+    deleteFolderAction = new QAction(tr("Delete Folder"), this);
+    connect(deleteFolderAction, &QAction::triggered, this, &myTreeView::onDeleteNodeAction);
+    //添加分支动作
+    addSubfolderAction = new QAction(tr("Add Subfolder"), this);
+    connect(addSubfolderAction, &QAction::triggered, this, &myTreeView::addFolderRequested);
+
+
+    //
+    contextMenuTimer.setInterval(100);
+    contextMenuTimer.setSingleShot(true);
+    connect(&contextMenuTimer, &QTimer::timeout, this, [this] {
+        if (!m_isEditing) {
+            closeCurrentEditor();
+        }
+    });
+
+    connect(contextMenu, &QMenu::aboutToHide, this, [this] {
+        m_isContextMenuOpened = false;
+        // this signal is emitted before QAction::triggered
+        contextMenuTimer.start();
+    });
+
+
+    //展开折叠
+    connect(this, &myTreeView::expanded, this, &myTreeView::onExpanded);
+    connect(this, &myTreeView::collapsed, this, &myTreeView::onCollapsed);
+
+    setDragEnabled(true);
+    setAcceptDrops(true);
+    setSelectionMode(QAbstractItemView::SingleSelection);
 
 }
 
@@ -142,7 +191,13 @@ void myTreeView::closeCurrentEditor()
 
 void myTreeView::updateEditingIndex(QPoint pos)
 {
+
     auto index = indexAt(pos);
+    if(!index.isValid())
+    {
+        qDebug()<<__FUNCTION__<<__LINE__<<"index is not valid";
+        return;
+    }
 
     //如果点击的索引不等于当前编辑的节点并且菜单没打开并且当前不在编辑状态
     if (indexAt(pos) != m_currentEditingIndex && !m_isContextMenuOpened && !m_isEditing)
@@ -152,6 +207,7 @@ void myTreeView::updateEditingIndex(QPoint pos)
         if (itemType == NodeItem::Type::FolderItem || itemType == NodeItem::Type::TrashButton
             || itemType == NodeItem::Type::AllNoteButton)
         {
+
             closePersistentEditor(m_currentEditingIndex); //关闭当前编辑的节点的持久化编辑
             openPersistentEditor(index);                  //打开新节点的持久化编辑器
             m_currentEditingIndex = index;                //将新节点设为当前编辑节点
@@ -161,6 +217,9 @@ void myTreeView::updateEditingIndex(QPoint pos)
             closeCurrentEditor();
         }
     }
+//    if(index==m_currentEditingIndex) qDebug()<<1;
+//    if(!m_isContextMenuOpened) qDebug()<<2;
+//    if(!m_isEditing) qDebug()<<3;
 }
 
 void myTreeView::setIgnoreThisCurrentLoad(bool newIgnoreThisCurrentLoad)
@@ -187,7 +246,7 @@ void myTreeView::onCustomContextMenu(QPoint point)
         if (itemType == NodeItem::Type::FolderItem)
         {
             auto id = index.data(NodeItem::Roles::NodeId).toInt(); //获取索引对应的ID
-
+            qDebug()<<__FUNCTION__<<__LINE__<<itemType<<"  "<<id;
             //如果这个ID不是默认文件夹
             if (id != SpecialNodeID::DefaultNotesFolder)
             {
@@ -199,6 +258,7 @@ void myTreeView::onCustomContextMenu(QPoint point)
                 contextMenu->addAction(addSubfolderAction);
                 contextMenu->exec(viewport()->mapToGlobal(point));
             }
+
         }
     }
 }
@@ -335,6 +395,12 @@ void myTreeView::currentChanged(const QModelIndex &current, const QModelIndex &p
 
 void myTreeView::onDeleteNodeAction()
 {
+    if (!m_currentEditingIndex.isValid())
+    {
+        qDebug() << __FUNCTION__<<__LINE__<<"Error: m_currentEditingIndex is not valid";
+        return;
+    }
+
     //获取正在编辑的节点的类型和ID
     auto itemType = static_cast<NodeItem::Type>(
         m_currentEditingIndex.data(NodeItem::Roles::ItemType).toInt());
@@ -385,6 +451,7 @@ void myTreeView::dragEnterEvent(QDragEnterEvent *event)
 
 void myTreeView::dropEvent(QDropEvent *event)
 {
+    qDebug()<<__FUNCTION__<<__LINE__;
     //判断拖入事件是否包含特定格式，也就是看拖动的是不是节点
     if (event->mimeData()->hasFormat(NOTE_MIME))
     {
@@ -436,24 +503,37 @@ void myTreeView::dragMoveEvent(QDragMoveEvent *event)
     if (event->mimeData()->hasFormat(NOTE_MIME))
     {
         auto index = indexAt(event->pos());     //获取源项的索引
-        auto itemType = static_cast<NodeItem::Type>(index.data(NodeItem::Roles::ItemType).toInt());//获取类型
-        if (itemType != NodeItem::Type::AllNoteButton) //如果不是"所有笔记按钮"项
+        if(index.isValid())
         {
-            //updateEditingIndex(event->pos());
-            event->acceptProposedAction();
+            auto itemType = static_cast<NodeItem::Type>(index.data(NodeItem::Roles::ItemType).toInt());//获取类型
+            if (itemType != NodeItem::Type::AllNoteButton) //如果不是"所有笔记按钮"项
+            {
+                updateEditingIndex(event->pos());
+                event->acceptProposedAction();
+            }
+        }
+        else
+        {
+             qDebug()<<"444";
+            qDebug()<<__FUNCTION__<<__LINE__<<"index is not valid";
+            return;
         }
     }
 
     //不是笔记类型
     else
-    {   //文件夹类型
+    {
+        //文件夹类型
         if (event->mimeData()->hasFormat(FOLDER_MIME))
         {
-            auto trashRect =   //获取垃圾桶项的坐标矩阵
+            auto trashRect =   //获取垃圾桶项的坐标矩形
                 visualRect(dynamic_cast<myTreeViewModel *>(model())->getTrashButtonIndex());
 
+            //qDebug()<<trashRect;
+            //qDebug()<<event->pos();
             //拖动到垃圾桶范围内
-            if (event->pos().y() > (trashRect.y() + 5)&& event->pos().y() < (trashRect.bottom() - 5))
+            //event->pos().y() > (trashRect.y() + 5)&& event->pos().y() < (trashRect.bottom() - 5)
+            if(1)
             {
                 setDropIndicatorShown(true); //显示拖放指示器
                 QTreeView::dragMoveEvent(event);
@@ -472,7 +552,6 @@ void myTreeView::dragMoveEvent(QDragMoveEvent *event)
                 return;
             }
         }
-
         setDropIndicatorShown(true);  //是否显示拖放指示器
         QTreeView::dragMoveEvent(event);
     }
@@ -489,8 +568,7 @@ void myTreeView::mouseMoveEvent(QMouseEvent *event)
     {
         return;
     }
-
-    updateEditingIndex(event->pos());
+    //updateEditingIndex(event->pos());
     //如果是拖动状态
     if (state() == DraggingState)
     {
@@ -571,6 +649,7 @@ void myTreeView::mousePressEvent(QMouseEvent *event)
     QPoint offset = d->offset();
     d->pressedPosition = pos + offset;
     updateEditingIndex(event->pos());
+
 }
 
 void myTreeView::mouseReleaseEvent(QMouseEvent *event)

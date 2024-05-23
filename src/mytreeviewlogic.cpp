@@ -1,4 +1,4 @@
-#include "mytreeviewlogic.h"
+﻿#include "mytreeviewlogic.h"
 myTreeViewLogic::myTreeViewLogic(myTreeView *treeView, myTreeViewModel *treeModel,
                                  DBManager *dbManager, myListView *listView, QObject *parent)
 :   QObject(parent),
@@ -188,6 +188,8 @@ void myTreeViewLogic::onRenameNodeRequestedFromTreeView(const QModelIndex &index
 
 void myTreeViewLogic::onDeleteFolderRequested(const QModelIndex &index)
 {
+    qDebug()<<__FUNCTION__<<__LINE__;
+
     //提示对话框的选择的返回值
     auto btn = QMessageBox::question(nullptr, "Are you sure you want to delete this folder",
                                      "Are you sure you want to delete this folder? All notes and "
@@ -263,6 +265,7 @@ void myTreeViewLogic::onChildNoteCountChangedFolder(int folderId, const QString 
 
 void myTreeViewLogic::onAddFolderRequested(bool fromPlusButton)
 {
+    //qDebug()<<__FUNCTION__<<__LINE__<<"fromPlusButton"<<fromPlusButton;
     QModelIndex currentIndex;
     //设置当前的索引
     if (fromPlusButton)
@@ -340,6 +343,8 @@ void myTreeViewLogic::onAddFolderRequested(bool fromPlusButton)
     }
     newFolder.setParentId(parentId); //设置父节点id(类型)
 
+    //qDebug()<<__FUNCTION__<<__LINE__<<"parentID"<<parentId;
+
     //数据库中添加节点
     QMetaObject::invokeMethod(m_dbManager, "addNode", Qt::BlockingQueuedConnection,
                               Q_RETURN_ARG(int, newlyCreatedNodeId), Q_ARG(NodeData, newFolder));
@@ -392,9 +397,10 @@ void myTreeViewLogic::onAddFolderRequested(bool fromPlusButton)
         updateTreeViewSeparator();
         m_treeView->setIgnoreThisCurrentLoad(false);
     }
+
 }
 
-void myTreeViewLogic::initConnect()
+void myTreeViewLogic:: initConnect()
 {
     //数据库更新，更新model
     connect(m_dbManager, &DBManager::nodesTagTreeReceived, this, &myTreeViewLogic::loadTreeModel,
@@ -405,6 +411,9 @@ void myTreeViewLogic::initConnect()
     //添加文件夹
     connect(m_treeView, &myTreeView::addFolderRequested, this,
             [this] { onAddFolderRequested(false); });
+    //删除节点
+    connect(m_treeView, &myTreeView::deleteNodeRequested, this,
+            &myTreeViewLogic::onDeleteFolderRequested);
     //添加文件夹
     connect(m_treeDelegate, &myTreeViewDelegate::addFolderRequested, this,
             [this] { onAddFolderRequested(true); });
@@ -414,9 +423,6 @@ void myTreeViewLogic::initConnect()
     //在数据库中重命名节点
     connect(this, &myTreeViewLogic::requestRenameNodeInDB, m_dbManager, &DBManager::renameNode,
             Qt::QueuedConnection);
-    //删除节点
-    connect(m_treeView, &myTreeView::deleteNodeRequested, this,
-            &myTreeViewLogic::onDeleteFolderRequested);
     //请求在数据库中移动节点
     connect(this, &myTreeViewLogic::requestMoveNodeInDB, m_dbManager, &DBManager::moveNode,
             Qt::QueuedConnection);

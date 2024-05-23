@@ -16,14 +16,18 @@ myTreeViewModel::~myTreeViewModel()
 void myTreeViewModel::appendChildNodeToParent
     (const QModelIndex &parentIndex, const QHash<NodeItem::Roles, QVariant> &data)
 {
+    //qDebug()<<__FUNCTION__<<__LINE__;
     if (rootItem)
     {
         //获取传入的类型的对应的枚举值
         const auto type = static_cast<NodeItem::Type>(data[NodeItem::Roles::ItemType].toInt());
 
+        //qDebug()<<__FUNCTION__<<__LINE__<<type;
+
         //如果是文件夹项类型
         if (type == NodeItem::Type::FolderItem)
         {
+
             //获取父节点内部成员变量的指针
             auto parentItem = static_cast<NodeTreeItem *>(parentIndex.internalPointer());
             //父节点为空或者传入的就是根节点
@@ -231,6 +235,7 @@ QModelIndex myTreeViewModel::getTrashButtonIndex()
             auto type = static_cast<NodeItem::Type>(child->data(NodeItem::Roles::ItemType).toInt());
             if (type == NodeItem::Type::TrashButton)
             {
+                //qDebug()<<__FUNCTION__<<__LINE__<<"Get trash";
                 return createIndex(i, 0, child);  //这个按钮唯一，直接返回
             }
         }
@@ -289,6 +294,7 @@ void myTreeViewModel::deleteRow(const QModelIndex &rowIndex, const QModelIndex &
     auto type = static_cast<NodeItem::Type>(rowIndex.data(NodeItem::Roles::ItemType).toInt());
     auto id = rowIndex.data(NodeItem::Roles::NodeId).toInt();
 
+    //qDebug
     //需要同时满足时文件夹类型并且不是默认笔记文件夹(相当于id>)
     if (!(type == NodeItem::Type::FolderItem && id > SpecialNodeID::DefaultNotesFolder))
     {

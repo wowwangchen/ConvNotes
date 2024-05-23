@@ -1,4 +1,4 @@
-
+﻿
 #ifndef MYTREEVIEW_H
 #define MYTREEVIEW_H
 
@@ -12,6 +12,7 @@
 #include<QMimeData>
 #include<QMenu>
 #include<QString>
+#include<QTimer>
 #include<QtWidgets/5.12.9/QtWidgets/private/qabstractitemview_p.h>
 #include"mytreeviewmodel.h"
 #include"nodepath.h"
@@ -92,7 +93,6 @@ signals:
     //请求移动节点位置
     void moveNodeRequested(int node, int target);
 
-
 public slots:
     //自定义菜单
     void onCustomContextMenu(QPoint point);
@@ -138,6 +138,7 @@ private:
     QAction*                deleteFolderAction;        //删除文件夹
     QAction*                addSubfolderAction;        //添加文件夹分支
     QAction*                changeFolderColorAction;   //改变文件夹标签的颜色
+    QTimer                  contextMenuTimer;          //定时器
     //QAction*                clearSelectionAction;      //清空选择的项
 
 
