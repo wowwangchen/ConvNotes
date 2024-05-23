@@ -32,6 +32,7 @@ SOURCES += \
 
 HEADERS += \
     allnotebuttontreedelegateeditor.h \
+    codetranslate.h \
     customapplicationstyle.h \
     customdocument.h \
     dbmanager.h \

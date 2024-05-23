@@ -1,8 +1,15 @@
-#include "mytreeview.h"
+﻿#include "mytreeview.h"
 
-myTreeView::myTreeView(QWidget* parent)
+myTreeView::myTreeView(QWidget* parent) : QTreeView(parent)
 {
-    Q_UNUSED(parent);
+
+    setHeaderHidden(true);
+    setRootIsDecorated(false);
+    setMouseTracking(true);
+
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
 }
 
 void myTreeView::setTreeSeparator(const QVector<QModelIndex> &newSeperator, const QModelIndex &defaultNotesIndex)

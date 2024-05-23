@@ -9,7 +9,7 @@
 #include"mylistview.h"
 #include"dbmanager.h"
 #include"customapplicationstyle.h"
-
+#include "codetranslate.h"
 
 //用于将树形结构的MVD和数据库进行操作
 class myTreeViewLogic : public QObject

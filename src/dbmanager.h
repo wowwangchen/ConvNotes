@@ -7,8 +7,9 @@
 #include<QDebug>
 #include<QString>
 #include<QFile>
-#include<QtSql/QSqlDatabase>
 #include<QSqlQuery>
+#include<QMetaType>
+#include<QSqlDatabase>
 #include<QSqlError>
 #include"nodedata.h"
 #include"nodepath.h"
@@ -21,7 +22,7 @@ struct NodeTagTreeData
     QVector<NodeData> nodeTreeData;
     //QVector<TagData> tagTreeData;
 };
-
+Q_DECLARE_METATYPE(NodeTagTreeData)
 struct ListViewInfo
 {
     bool        isInSearch;
@@ -94,6 +95,8 @@ public slots:
     int addNode(const NodeData &node);
     //移除节点
     void removeNote(const NodeData &note);
+    //初始化文件树
+    void onNodeTagTreeRequested();
     //获得笔记列表
     void onNotesListInFolderRequested(int parentID, bool isRecursive, bool newNote = false,
                                       int scrollToId = SpecialNodeID::InvalidNodeId);

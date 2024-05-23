@@ -1,9 +1,11 @@
-#include "mytreeviewmodel.h"
+﻿#include "mytreeviewmodel.h"
 
 
 myTreeViewModel::myTreeViewModel(QObject *parent) : QAbstractItemModel(parent), rootItem(nullptr)
 {
-
+    auto hs = QHash<NodeItem::Roles, QVariant>{};
+    hs[NodeItem::Roles::ItemType] = NodeItem::Type::RootItem;
+    rootItem = new NodeTreeItem(hs);
 }
 
 myTreeViewModel::~myTreeViewModel()
@@ -815,7 +817,7 @@ void myTreeViewModel::appendAllNotesAndTrashButton(NodeTreeItem *rootNode)
 
         hs[NodeItem::Roles::ItemType] = NodeItem::Type::AllNoteButton; //类型
         hs[NodeItem::Roles::DisplayText] = tr("All Notes");            //显示文字
-        hs[NodeItem::Roles::Icon] = u8"\ue2c7"; // folder              //图标
+        hs[NodeItem::Roles::Icon] = u8"\ue2c7"; // folder              //图标  \U0001F5D1
 
         //新建节点项，添加父子关系
         auto allNodeButton = new NodeTreeItem(hs, rootNode);
@@ -828,7 +830,7 @@ void myTreeViewModel::appendAllNotesAndTrashButton(NodeTreeItem *rootNode)
 
         hs[NodeItem::Roles::ItemType] = NodeItem::Type::TrashButton;
         hs[NodeItem::Roles::DisplayText] = tr("Trash");
-        hs[NodeItem::Roles::Icon] = u8"\uf1f8"; // fa-trash
+        hs[NodeItem::Roles::Icon] = u8"\uf1f8"; // fa-trash   \U0001F5D1
 
         auto trashButton = new NodeTreeItem(hs, rootNode);
         rootNode->appendChild(trashButton);

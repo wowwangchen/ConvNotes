@@ -1,4 +1,4 @@
-#include "mytreeviewdelegate.h"
+﻿#include "mytreeviewdelegate.h"
 #include "nodetreeitem.h"
 #include "fontloader.h"
 #include"pushbuttontype.h"
@@ -118,6 +118,7 @@ void myTreeViewDelegate::setTheme(Theme::Value theme)
 
 void myTreeViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    //qDebug()<<__FUNCTION__<<"paint";
     //设置抗锯齿渲染
     painter->setRenderHint(QPainter::Antialiasing);
     //获取传入的索引的项的类型
@@ -130,6 +131,7 @@ void myTreeViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
 #else
     int iconPointSizeOffset = -4;
 #endif
+
 
     //填充传入项的区域的背景颜色
     painter->fillRect(option.rect, m_currentBackgroundColor);
@@ -150,8 +152,10 @@ void myTreeViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
             paintBackgroundSelectable(painter, option, index);
 
             //图标的位置
-            auto iconRect = QRect(option.rect.x() + 22,
-                                  option.rect.y() + (option.rect.height() - 20) / 2, 18, 20);
+
+            auto iconRect = QRect(option.rect.x() + 22,  //+22
+                                  option.rect.y() + (option.rect.height() - 20) / 2, 38, 40); //18 20
+            //qDebug()<<__FUNCTION__<<option.rect;
             //painter之前的字体留个备份
             QFont previousPainterFont = painter->font();
 
@@ -182,7 +186,7 @@ void myTreeViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
                     iconRect.setY(iconRect.y() + 2);
                     painter->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
                                                                         16 + iconPointSizeOffset));
-                    painter->drawText(iconRect, u8"\uf1f8"); // fa-trash图标
+                    painter->drawText(iconRect, u8"\uf1f8"); // fa-trash图标  \U0001F5D1
                 }
             }
 
@@ -209,7 +213,7 @@ void myTreeViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
             painter->setFont(previousPainterFont);                                  //设置之前的字体
             auto displayName = index.data(NodeItem::Roles::DisplayText).toString(); //要展示的内容
             QRect nameRect(option.rect);                                            //展示的矩形框
-            nameRect.setLeft(iconRect.x() + iconRect.width() + 5);                  //设置矩形框位置,图标的右边5个像素
+            nameRect.setLeft(iconRect.x() + iconRect.width() + 10);//+5                  //设置矩形框位置,图标的右边5个像素
             nameRect.setWidth(nameRect.width() - 5 - 40);
 
             //传入的项的被选的状态，来设置不同的标题颜色

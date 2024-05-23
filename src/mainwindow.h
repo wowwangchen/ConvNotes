@@ -7,12 +7,17 @@
 #include<QColorDialog>
 #include<QMouseEvent>
 #include<QObject>
+#include<QSettings>
 #include<QEvent>
+#include<QThread>
+#include<QDir>
+#include<QFileInfo>
 #include<QDebug>
 #include"mytreeview.h"
 #include"mytreeviewlogic.h"
 #include"mytreeviewmodel.h"
 #include"customdocument.h"
+#include "codetranslate.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -65,14 +70,23 @@ public:
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void    setupMainWindow();              //初始化主界面
-    void    setupModelView();               //初始化模型视图
-    void    initWindow();
-    void    initConnect();
+    void    setupMainWindow();                      //初始化主界面
+    void    initWindow();                           //初始化窗口
+    void    setDataBase();                          //初始化数据库
+    void    initConnect();                          //初始化信号与槽
+    void    setupModelView();                       //初始化模型视图
     void    setColorDialogSS(QColorDialog *dialog);
+    void    initializeSettingsDatabase();           //初始化程序设置数据库
 
-private slots:
+public slots:
     void settingButton_clicked();
+    void setTheme(Theme::Value theme);
+
+signals:
+    void requestOpenDBManager(const QString &path, bool doCreate);
+    void requestNodesTree();
+
+
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
@@ -95,7 +109,10 @@ private:
     CustomDocument*         m_textEdit;                     //代表文本编辑框
     QLabel*                 m_editorDateLabel;              //代表日期编辑标签
 
+    QSettings*              m_settingsDatabase;             //应用程序配置的数据库
+    QSettings*              m_localLicenseData;             //本地许可证的数据
     DBManager*              m_dbManager;                    //数据库
+    QThread*                m_dbThread;                     //处理数据库的线程
 
 
     QString                 m_displayFont;                  //展示的内容的字体

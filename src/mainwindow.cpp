@@ -1,15 +1,14 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow),
+    m_listView(nullptr),
     m_treeView(nullptr),
     m_treeModel(new myTreeViewModel(this)),
     m_treeViewLogic(nullptr),
-    m_listView(nullptr),
-
-    //m_dbManager(nullptr),
+    m_dbManager(nullptr),
 
     m_newNoteButton(nullptr),
     m_dotsButton(nullptr),
@@ -27,12 +26,16 @@ MainWindow::MainWindow(QWidget *parent)
     setMouseTracking(true);
     ui->iconPackageLabel->installEventFilter(this);  //组件必须安装事件过滤器，主窗口才能接收到事件
 
-    //m_dbManager=new DBManager;
 
     setupMainWindow();
+    setDataBase();
     setupModelView();
     initWindow();
     initConnect();
+
+    connect(this, &MainWindow::requestNodesTree, m_dbManager, &DBManager::onNodeTagTreeRequested,
+            Qt::BlockingQueuedConnection);
+    emit requestNodesTree();
 }
 
 MainWindow::~MainWindow()
@@ -66,10 +69,9 @@ void MainWindow::setupModelView()
     m_listView=ui->filesListView;
     //文件夹树形结构
     m_treeView = static_cast<myTreeView*>(ui->allPackageTreeView);
-    if(m_treeModel==nullptr)
-        qDebug()<<__FUNCTION__<<"error";
-    //m_treeView->setModel(m_treeModel);
-    //m_treeViewLogic = new myTreeViewLogic(m_treeView, m_treeModel, m_dbManager, m_listView, this);
+    m_treeView->setModel(m_treeModel);
+    m_treeViewLogic = new myTreeViewLogic(m_treeView, m_treeModel, m_dbManager, m_listView, this);
+
 }
 
 void MainWindow::initWindow()
@@ -135,15 +137,150 @@ void MainWindow::initWindow()
     ui->lastChangeDateLabel->setText(formattedDateTime);
 
     ui->searchLineText->setPlaceholderText("Search");
+    QString str = QString::fromUtf8(u8"\U0001F5D1");
+
 
     ui->iconPackageLabel->setStyleSheet(iconColorss);
 
-    //m_treeModel=new myTreeViewModel;
-    //m_treeDelegate=new myTreeViewDelegate(ui->allPackageTreeView);
-    //ui->allPackageTreeView->setModel(m_treeModel);
+}
+
+void MainWindow::setDataBase()
+{
+    m_settingsDatabase =
+        new QSettings(QSettings::IniFormat, QSettings::UserScope, QStringLiteral("myAwesomeness"),
+                      QStringLiteral("mySettings"), this);
+
+
+#if !defined(PRO_VERSION)
+
+#  if defined(Q_OS_UNIX) && !defined(Q_OS_MACOS)
+    m_localLicenseData =
+        new QSettings(QSettings::NativeFormat, QSettings::UserScope,
+                      QStringLiteral("myAwesomeness"), QStringLiteral(".mynotesLicenseData"), this);
+#  else
+    m_localLicenseData =
+        new QSettings(QSettings::NativeFormat, QSettings::UserScope,
+                      QStringLiteral("myAwesomeness"), QStringLiteral("mynotesLicenseData"), this);
+#  endif
+
+#endif
+
+    m_settingsDatabase->setFallbacksEnabled(false);
+    bool needMigrateFromV1_5_0 = false;
+    if (m_settingsDatabase->value(QStringLiteral("version"), "NULL") == "NULL")
+    {
+        needMigrateFromV1_5_0 = true;
+    }
+    auto versionString = m_settingsDatabase->value(QStringLiteral("version")).toString();
+    auto major = versionString.split(".").first().toInt();
+    if (major < 2)
+    {
+        needMigrateFromV1_5_0 = true;
+    }
+    initializeSettingsDatabase();
+
+
+    bool doCreate = false;
+
+    //文件消息类
+    QFileInfo fi(m_settingsDatabase->fileName());
+    QDir dir(fi.absolutePath());
+    bool folderCreated = dir.mkpath(QStringLiteral("."));
+    if (!folderCreated)
+        qFatal("ERROR: Can't create settings folder : %s",
+               dir.absolutePath().toStdString().c_str());
+    QString defaultDBPath = dir.path() + QDir::separator() + QStringLiteral("notes.db");
+
+    QString noteDBFilePath =
+        m_settingsDatabase->value(QStringLiteral("noteDBFilePath"), QString()).toString();
+    if (noteDBFilePath.isEmpty())
+    {
+        noteDBFilePath = defaultDBPath;
+    }
+
+    QFileInfo noteDBFilePathInf(noteDBFilePath);
+    QFileInfo defaultDBPathInf(defaultDBPath);
+
+    if ((!noteDBFilePathInf.exists()) && (defaultDBPathInf.exists()))
+    {
+        QDir().mkpath(noteDBFilePathInf.absolutePath());
+        QFile defaultDBFile(defaultDBPath);
+        defaultDBFile.rename(noteDBFilePath);
+    }
+    if (QFile::exists(noteDBFilePath) && needMigrateFromV1_5_0)
+    {
+        {
+            auto m_db = QSqlDatabase::addDatabase("QSQLITE", DEFAULT_DATABASE_NAME);
+            m_db.setDatabaseName(noteDBFilePath);
+            if (m_db.open())
+            {
+                QSqlQuery query(m_db);
+                if (query.exec("SELECT name FROM sqlite_master WHERE type='table' AND "
+                               "name='tag_table';"))
+                {
+                    if (query.next() && query.value(0).toString() == "tag_table")
+                    {
+                        needMigrateFromV1_5_0 = false;
+                    }
+                }
+                m_db.close();
+            }
+            m_db = QSqlDatabase::database();
+        }
+        QSqlDatabase::removeDatabase(DEFAULT_DATABASE_NAME);
+    }
+    if (!QFile::exists(noteDBFilePath))
+    {
+        QFile noteDBFile(noteDBFilePath);
+        if (!noteDBFile.open(QIODevice::WriteOnly))
+            qFatal("ERROR : Can't create database file");
+
+        noteDBFile.close();
+        doCreate = true;
+        needMigrateFromV1_5_0 = false;
+    }
+    else if (needMigrateFromV1_5_0)
+    {
+        QFile noteDBFile(noteDBFilePath);
+        noteDBFile.rename(dir.path() + QDir::separator() + QStringLiteral("oldNotes.db"));
+        noteDBFile.setFileName(noteDBFilePath);
+        if (!noteDBFile.open(QIODevice::WriteOnly))
+            qFatal("ERROR : Can't create database file");
+
+        noteDBFile.close();
+        doCreate = true;
+    }
+
+
+    if (needMigrateFromV1_5_0)
+    {
+        m_settingsDatabase->setValue(QStringLiteral("version"), qApp->applicationVersion());
+    }
 
 
 
+    m_dbManager = new DBManager;
+    m_dbThread = new QThread;
+    m_dbThread->setObjectName(QStringLiteral("dbThread"));
+    m_dbManager->moveToThread(m_dbThread);
+    connect(m_dbThread, &QThread::started, this, [=]() {
+        setTheme(m_currentTheme);
+
+//        if (needMigrateFromV1_5_0)
+//        {
+//            emit requestMigrateNotesFromV1_5_0(dir.path() + QDir::separator()
+//                                               + QStringLiteral("oldNotes.db"));
+//        }
+    });
+    connect(this, &MainWindow::requestOpenDBManager, m_dbManager,
+            &DBManager::onOpenDBManagerRequested, Qt::QueuedConnection);
+    emit requestOpenDBManager(noteDBFilePath, doCreate);
+
+
+//    connect(this, &MainWindow::requestMigrateNotesFromV1_5_0, m_dbManager,
+//            &DBManager::onMigrateNotesFrom1_5_0Requested, Qt::QueuedConnection);
+    connect(m_dbThread, &QThread::finished, m_dbManager, &QObject::deleteLater);
+    m_dbThread->start();
 }
 
 void MainWindow::initConnect()
@@ -160,11 +297,21 @@ void MainWindow::setColorDialogSS(QColorDialog *dialog)
     //dialog->resize(QSize(1000, 700)); // 设置对话框的宽度为400，高度为300
 }
 
+void MainWindow::initializeSettingsDatabase()
+{
+
+}
+
 
 
 void MainWindow::settingButton_clicked()
 {
     QMessageBox::information(this,"no","no");
+}
+
+void MainWindow::setTheme(Theme::Value theme)
+{
+
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event)

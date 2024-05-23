@@ -13,6 +13,7 @@
 #include<QLabel>
 #include<QPushButton>
 #include"mytreeview.h"
+#include "codetranslate.h"
 
 //L_DECLARE_ENUM(Theme, Light, Dark, Sepia)
 
@@ -20,10 +21,10 @@
 //树形结构中不同的项的高度
 struct NoteTreeConstant
 {
-    static constexpr int folderItemHeight = 30;
-    static constexpr int tagItemHeight = 30;
-    static constexpr int folderLabelHeight = 35;
-    static constexpr int tagLabelHeight = 35;
+    static constexpr int folderItemHeight = 45;
+    static constexpr int tagItemHeight = 45;
+    static constexpr int folderLabelHeight = 50;
+    static constexpr int tagLabelHeight = 50;  //+20 -5
 };
 
 

@@ -37,7 +37,7 @@
     <item row="0" column="0">
      <widget class="QFrame" name="backFrame">
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(251, 240, 217);</string>
+       <string notr="true"/>
       </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
@@ -179,7 +179,9 @@
              </property>
              <property name="styleSheet">
               <string notr="true">background-color: transparent;
-border:none;</string>
+border:none;
+
+</string>
              </property>
             </widget>
            </item>

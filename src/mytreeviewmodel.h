@@ -12,7 +12,7 @@
 #include"nodetreeitem.h"
 #include"nodedata.h"
 #include"dbmanager.h"
-
+#include "codetranslate.h"
 
 
 //此类是用于管理数据的一个模型，包含众多nodeTreeItem，并管理众多项

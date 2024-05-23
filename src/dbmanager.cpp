@@ -1,4 +1,4 @@
-#include "dbmanager.h"
+﻿#include "dbmanager.h"
 
 DBManager::DBManager(QObject *parent) : QObject(parent)
 {
@@ -170,7 +170,7 @@ void DBManager::open(const QString &path, bool doCreate)
     }
     else
     {
-        qDebug() << "Database: connection ok";
+        qDebug() << __FUNCTION__<<__LINE__<<"Database: connection ok";
     }
 
     if (doCreate)
@@ -182,6 +182,7 @@ void DBManager::open(const QString &path, bool doCreate)
 
 void DBManager::createTables()
 {
+    qDebug()<<__FUNCTION__<<__LINE__;
     //开始事务，原子操作
     m_db.transaction();
     QSqlQuery query(m_db);
@@ -308,7 +309,7 @@ void DBManager::createTables()
 void DBManager::recalculateChildNotesCount()
 {
     //查询所有文件件类型的节点的id、绝对路径
-    QSqlQuery query;
+    QSqlQuery query(m_db);
     bool status;
     QMap<int, QString> folderIds;
     query.prepare(R"(SELECT id, absolute_path )"
@@ -1285,6 +1286,7 @@ QVector<NodeData> DBManager::getAllFolders()
 {
     QVector<NodeData> nodeList;
 
+
     //查询文件夹类型的节点的数据
     QSqlQuery query(m_db);
     query.prepare(R"(SELECT)"
@@ -1301,7 +1303,6 @@ QVector<NodeData> DBManager::getAllFolders()
                   R"("child_notes_count" )"
                   R"(FROM node_table WHERE node_type=:node_type;)");
     query.bindValue(":node_type", static_cast<int>(NodeData::Type::Folder));
-
 
     bool status = query.exec();
     if (status)
@@ -1998,6 +1999,14 @@ void DBManager::removeNote(const NodeData &note)
         auto trashFolder = getNode(SpecialNodeID::TrashFolder);
         moveNode(note.id(), trashFolder);
     }
+}
+
+void DBManager::onNodeTagTreeRequested()
+{
+    NodeTagTreeData d;
+    d.nodeTreeData = getAllFolders();
+
+    emit nodesTagTreeReceived(d);
 }
 
 int DBManager::addNode(const NodeData &node)
