@@ -188,7 +188,6 @@ void myTreeViewLogic::onRenameNodeRequestedFromTreeView(const QModelIndex &index
 
 void myTreeViewLogic::onDeleteFolderRequested(const QModelIndex &index)
 {
-    qDebug()<<__FUNCTION__<<__LINE__;
 
     //提示对话框的选择的返回值
     auto btn = QMessageBox::question(nullptr, "Are you sure you want to delete this folder",
@@ -201,27 +200,39 @@ void myTreeViewLogic::onDeleteFolderRequested(const QModelIndex &index)
         //索引对应的特殊节点id
         auto id = index.data(NodeItem::Roles::NodeId).toInt();
 
+        qDebug()<<__FUNCTION__<<__LINE__<<id;
+
         if (id < SpecialNodeID::DefaultNotesFolder)
+
+        qDebug()<<__FUNCTION__<<__LINE__<<11;
         {
             qDebug() << __FUNCTION__ << "Failed while trying to delete folder with id" << id;
             return;
         }
 
-
+        qDebug()<<__FUNCTION__<<__LINE__<<12;
         //获取数据库中id对应的nodedata
         NodeData node;
+        qDebug()<<__FUNCTION__<<__LINE__<<13;
         QMetaObject::invokeMethod(m_dbManager, "getNode", Qt::BlockingQueuedConnection,
                                   Q_RETURN_ARG(NodeData, node), Q_ARG(int, id));
+        qDebug()<<__FUNCTION__<<__LINE__<<14;
         auto parentPath = NodePath{ node.absolutePath() }.parentPath();
         auto parentIndex = m_treeModel->folderIndexFromIdPath(parentPath);
+
+        qDebug()<<__FUNCTION__<<__LINE__<<15;
 
         //父节点合法，model中删除这一行，数据库中删除
         if (parentIndex.isValid())
         {
+            qDebug()<<__FUNCTION__<<__LINE__<<16;
             m_treeModel->deleteRow(index, parentIndex);
+            qDebug()<<__FUNCTION__<<__LINE__<<17;
             QMetaObject::invokeMethod(m_dbManager, "moveFolderToTrash", Qt::QueuedConnection,
                                       Q_ARG(NodeData, node));
+            qDebug()<<__FUNCTION__<<__LINE__<<18;
             m_treeView->setCurrentIndexC(m_treeModel->getAllNotesButtonIndex());
+            qDebug()<<__FUNCTION__<<__LINE__<<19;
         }
         else
         {

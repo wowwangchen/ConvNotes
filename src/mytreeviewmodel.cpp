@@ -393,7 +393,6 @@ int myTreeViewModel::rowCount(const QModelIndex &parent) const
     {
         return 0;
     }
-
     if (!parent.isValid())
     {
         parentItem = rootItem;
@@ -402,7 +401,6 @@ int myTreeViewModel::rowCount(const QModelIndex &parent) const
     {
         parentItem = static_cast<NodeTreeItem *>(parent.internalPointer());
     }
-
     return parentItem->childCount();
 }
 

@@ -9,10 +9,6 @@ NodeTreeItem::NodeTreeItem(const QHash<NodeItem::Roles, QVariant> &data, NodeTre
 NodeTreeItem::~NodeTreeItem()
 {
     qDeleteAll(m_childItems);
-    if (m_parentItem)
-    {
-        m_parentItem->m_childItems.removeOne(this);
-    }
 }
 
 void NodeTreeItem::appendChild(NodeTreeItem *child)

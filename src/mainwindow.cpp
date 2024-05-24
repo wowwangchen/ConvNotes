@@ -41,6 +41,9 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+    m_dbThread->quit();
+    m_dbThread->wait();
+    delete m_dbThread;
 }
 
 void MainWindow::setupMainWindow()

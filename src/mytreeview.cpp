@@ -246,7 +246,6 @@ void myTreeView::onCustomContextMenu(QPoint point)
         if (itemType == NodeItem::Type::FolderItem)
         {
             auto id = index.data(NodeItem::Roles::NodeId).toInt(); //获取索引对应的ID
-            qDebug()<<__FUNCTION__<<__LINE__<<itemType<<"  "<<id;
             //如果这个ID不是默认文件夹
             if (id != SpecialNodeID::DefaultNotesFolder)
             {
@@ -405,14 +404,17 @@ void myTreeView::onDeleteNodeAction()
     auto itemType = static_cast<NodeItem::Type>(
         m_currentEditingIndex.data(NodeItem::Roles::ItemType).toInt());
     auto id = m_currentEditingIndex.data(NodeItem::Roles::NodeId).toInt();
-
+    qDebug()<<__FUNCTION__<<__LINE__<<itemType;
+    qDebug()<<__FUNCTION__<<__LINE__<<id;
 
     //如果是文件夹项或者笔记项
     if (itemType == NodeItem::Type::FolderItem || itemType == NodeItem::Type::NoteItem)
     {
+        qDebug()<<__FUNCTION__<<__LINE__<<3;
         //如果ID>默认笔记文件夹ID,也就是是新创建的节点
         if (id > SpecialNodeID::DefaultNotesFolder)
         {
+             qDebug()<<__FUNCTION__<<__LINE__<<4;
             auto index = m_currentEditingIndex;
             emit deleteNodeRequested(index);  //发送删除信号
         }
@@ -451,7 +453,9 @@ void myTreeView::dragEnterEvent(QDragEnterEvent *event)
 
 void myTreeView::dropEvent(QDropEvent *event)
 {
-    qDebug()<<__FUNCTION__<<__LINE__;
+
+
+
     //判断拖入事件是否包含特定格式，也就是看拖动的是不是节点
     if (event->mimeData()->hasFormat(NOTE_MIME))
     {
@@ -512,12 +516,6 @@ void myTreeView::dragMoveEvent(QDragMoveEvent *event)
                 event->acceptProposedAction();
             }
         }
-        else
-        {
-             qDebug()<<"444";
-            qDebug()<<__FUNCTION__<<__LINE__<<"index is not valid";
-            return;
-        }
     }
 
     //不是笔记类型
@@ -533,21 +531,24 @@ void myTreeView::dragMoveEvent(QDragMoveEvent *event)
             //qDebug()<<event->pos();
             //拖动到垃圾桶范围内
             //event->pos().y() > (trashRect.y() + 5)&& event->pos().y() < (trashRect.bottom() - 5)
-            if(1)
+            if (event->pos().y() > (trashRect.y() + 5)
+                && event->pos().y() < (trashRect.bottom() - 5))
             {
                 setDropIndicatorShown(true); //显示拖放指示器
                 QTreeView::dragMoveEvent(event);
                 return;
             }
             //在整个树形结构之外，忽略
-            if (event->pos().y() > visualRect(m_treeSeparator[1]).y())
+            if (m_treeSeparator.size() > 1 && event->pos().y() > visualRect(m_treeSeparator[1]).y())
             {
+
                 event->ignore();
                 return;
             }
             //默认节点之下25的位置以内,忽略
             if (event->pos().y() < visualRect(m_defaultNotesIndex).y() + 25)
             {
+
                 event->ignore();
                 return;
             }
