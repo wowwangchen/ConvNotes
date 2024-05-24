@@ -1,4 +1,4 @@
-#ifndef NODETREEITEM_H
+﻿#ifndef NODETREEITEM_H
 #define NODETREEITEM_H
 
 #include <QObject>

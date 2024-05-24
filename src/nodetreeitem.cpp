@@ -19,6 +19,7 @@ void NodeTreeItem::appendChild(NodeTreeItem *child)
 void NodeTreeItem::insertChild(int row, NodeTreeItem *child)
 {
     m_childItems.insert(row, child);
+    //qDebug()<<__FUNCTION__<<__LINE__<<"childcount:"<<childCount();
 }
 
 NodeTreeItem *NodeTreeItem::child(int row)
@@ -32,6 +33,7 @@ NodeTreeItem *NodeTreeItem::child(int row)
 
 void NodeTreeItem::removeChild(int row)
 {
+    //qDebug()<<__FUNCTION__<<__LINE__;
     if (row < 0 || row >= m_childItems.size())
     {
         return;
@@ -50,7 +52,7 @@ NodeTreeItem *NodeTreeItem::takeChildAt(int row)
 
 int NodeTreeItem::childCount() const
 {
-    return m_childItems.count();
+    return m_childItems.size();
 }
 
 int NodeTreeItem::columnCount() const

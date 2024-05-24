@@ -404,17 +404,15 @@ void myTreeView::onDeleteNodeAction()
     auto itemType = static_cast<NodeItem::Type>(
         m_currentEditingIndex.data(NodeItem::Roles::ItemType).toInt());
     auto id = m_currentEditingIndex.data(NodeItem::Roles::NodeId).toInt();
-    qDebug()<<__FUNCTION__<<__LINE__<<itemType;
-    qDebug()<<__FUNCTION__<<__LINE__<<id;
+//    qDebug()<<__FUNCTION__<<__LINE__<<itemType;
+//    qDebug()<<__FUNCTION__<<__LINE__<<id;
 
     //如果是文件夹项或者笔记项
     if (itemType == NodeItem::Type::FolderItem || itemType == NodeItem::Type::NoteItem)
     {
-        qDebug()<<__FUNCTION__<<__LINE__<<3;
         //如果ID>默认笔记文件夹ID,也就是是新创建的节点
         if (id > SpecialNodeID::DefaultNotesFolder)
         {
-             qDebug()<<__FUNCTION__<<__LINE__<<4;
             auto index = m_currentEditingIndex;
             emit deleteNodeRequested(index);  //发送删除信号
         }
@@ -601,6 +599,8 @@ void myTreeView::mousePressEvent(QMouseEvent *event)
     d->delayedAutoScroll.stop();
 
     auto index = indexAt(event->pos());
+//    auto item = static_cast<NodeTreeItem *>(index.internalPointer());
+//    qDebug()<<__FUNCTION__<<__LINE__<<"row:"<<item->row();
     if (index.isValid())
     {
         auto itemType =     //获取点击的索引对应的节点的类型

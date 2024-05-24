@@ -294,7 +294,7 @@ void myTreeViewModel::deleteRow(const QModelIndex &rowIndex, const QModelIndex &
     auto type = static_cast<NodeItem::Type>(rowIndex.data(NodeItem::Roles::ItemType).toInt());
     auto id = rowIndex.data(NodeItem::Roles::NodeId).toInt();
 
-    //qDebug
+
     //需要同时满足时文件夹类型并且不是默认笔记文件夹(相当于id>)
     if (!(type == NodeItem::Type::FolderItem && id > SpecialNodeID::DefaultNotesFolder))
     {
@@ -321,18 +321,23 @@ void myTreeViewModel::deleteRow(const QModelIndex &rowIndex, const QModelIndex &
         //这里不会造成内存泄漏，remove某一行后，delete后，调用item的析构函数，也会删除这某一行的所有子节点
         parentItem->removeChild(row);            //父节点移除这各子节点
         endResetModel();                        //结束清除，刷新视图等
+
         emit topLevelItemLayoutChanged();       //发送顶级节点发生改变的信号
     }
 
     //不是父节点，移出所有子节点及其子节点...
     else
     {
-        int count = item->recursiveNodeCount();
-        beginRemoveRows(parentIndex, row, row + count - 1);     //model中移除数据
+//        int count = item->recursiveNodeCount();
+//        qDebug()<<"parent:"<<parentItem->childCount();
+//        qDebug()<<"row:"<<row;
+//        qDebug()<<"count:"<<count;
+        beginRemoveRows(parentIndex, row, row);     //model中移除数据 + count - 1
         parentItem->removeChild(row);                           //自定义的数据结构中移除
         endRemoveRows();
     }
 }
+
 
 QModelIndex myTreeViewModel::index(int row, int column, const QModelIndex &parent) const
 {
