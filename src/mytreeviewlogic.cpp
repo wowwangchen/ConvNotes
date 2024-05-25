@@ -268,6 +268,7 @@ void myTreeViewLogic::onChildNoteCountChangedFolder(int folderId, const QString 
 
 void myTreeViewLogic::onAddFolderRequested(bool fromPlusButton)
 {
+    m_treeView->setRootIsDecorated(false);
     //qDebug()<<__FUNCTION__<<__LINE__<<"fromPlusButton"<<fromPlusButton;
     QModelIndex currentIndex;
     //设置当前的索引

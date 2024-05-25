@@ -826,7 +826,7 @@ void myTreeViewModel::appendAllNotesAndTrashButton(NodeTreeItem *rootNode)
 
         hs[NodeItem::Roles::ItemType] = NodeItem::Type::AllNoteButton; //类型
         hs[NodeItem::Roles::DisplayText] = tr("All Notes");            //显示文字
-        hs[NodeItem::Roles::Icon] = u8"\ue2c7"; // folder              //图标  \U0001F5D1
+        hs[NodeItem::Roles::Icon] = u8"\U0001F4C1"; // folder              //图标  \U0001F5D1   \ue2c7
 
         //新建节点项，添加父子关系
         auto allNodeButton = new NodeTreeItem(hs, rootNode);
@@ -839,7 +839,7 @@ void myTreeViewModel::appendAllNotesAndTrashButton(NodeTreeItem *rootNode)
 
         hs[NodeItem::Roles::ItemType] = NodeItem::Type::TrashButton;
         hs[NodeItem::Roles::DisplayText] = tr("Trash");
-        hs[NodeItem::Roles::Icon] = u8"\uf1f8"; // fa-trash   \U0001F5D1
+        hs[NodeItem::Roles::Icon] = u8"\U0001F5D1"; // fa-trash   \U0001F5D1 uf1f8
 
         auto trashButton = new NodeTreeItem(hs, rootNode);
         rootNode->appendChild(trashButton);

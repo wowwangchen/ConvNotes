@@ -143,7 +143,22 @@ void MainWindow::initWindow()
     QString str = QString::fromUtf8(u8"\U0001F5D1");
 
 
-    ui->iconPackageLabel->setStyleSheet(iconColorss);
+    ui->allPackageTreeView->setStyleSheet(R"(
+    QTreeView{background-color: transparent;
+    border:none;}
+    QTreeView::branch:has-children:!has-siblings:closed,
+    QTreeView::branch:closed:has-children:has-siblings {
+        border-image: none;
+        image: none;
+    }
+    QTreeView::branch:open:has-children:!has-siblings,
+    QTreeView::branch:open:has-children:has-siblings {
+        border-image: none;
+        image: none;
+    }
+)");
+
+
 
 }
 

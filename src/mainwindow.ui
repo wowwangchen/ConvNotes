@@ -180,10 +180,6 @@
              <property name="styleSheet">
               <string notr="true">background-color: transparent;
 border:none;
-QTreeView::item
-{
-	background-color: transparent;
-}
 
 </string>
              </property>

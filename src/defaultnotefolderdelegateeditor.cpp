@@ -75,18 +75,27 @@ void DefaultNoteFolderDelegateEditor::paintEvent(QPaintEvent *event)
     folderIconRect.setLeft(iconRect.x() + iconRect.width());
     folderIconRect.setTop(rect().y() + 5);
     folderIconRect.setWidth(18);
-    if (m_view->selectionModel()->isSelected(m_index)) {
+    if (m_view->selectionModel()->isSelected(m_index))
+    {
         painter.fillRect(rect(), QBrush(m_activeColor));
         painter.setPen(m_titleSelectedColor);
-    } else {
+    }
+    else
+    {
         auto listView = dynamic_cast<myTreeView *>(m_listView);
-        if (listView->isDragging()) {
-            if (m_theme == Theme::Dark) {
+        if (listView->isDragging())
+        {
+            if (m_theme == Theme::Dark)
+            {
                 painter.fillRect(rect(), QBrush(QColor(35, 52, 69)));
-            } else {
+            }
+            else
+            {
                 painter.fillRect(rect(), QBrush(QColor(180, 208, 233)));
             }
-        } else {
+        }
+        else
+        {
             painter.fillRect(rect(), QBrush(m_hoverColor));
         }
         painter.setPen(m_folderIconColor);
@@ -98,7 +107,7 @@ void DefaultNoteFolderDelegateEditor::paintEvent(QPaintEvent *event)
 #endif
     painter.setFont(FontLoader::getInstance().loadFont("Material Symbols Outlined", "",
                                                        16 + iconPointSizeOffset));
-    painter.drawText(folderIconRect, u8"\ue2c7"); // folder
+    painter.drawText(folderIconRect, u8"\U0001F4C1"); // folder  \ue2c7
 
     QRect nameRect(rect());
     nameRect.setLeft(folderIconRect.x() + folderIconRect.width() + 5);
@@ -108,9 +117,12 @@ void DefaultNoteFolderDelegateEditor::paintEvent(QPaintEvent *event)
     QFontMetrics fm(m_titleFont);
     displayName = fm.elidedText(displayName, Qt::ElideRight, nameRect.width());
 
-    if (m_view->selectionModel()->isSelected(m_index)) {
+    if (m_view->selectionModel()->isSelected(m_index))
+    {
         painter.setPen(m_titleSelectedColor);
-    } else {
+    }
+    else
+    {
         painter.setPen(m_titleColor);
     }
     painter.setFont(m_titleFont);
@@ -119,9 +131,13 @@ void DefaultNoteFolderDelegateEditor::paintEvent(QPaintEvent *event)
     childCountRect.setLeft(nameRect.right() + 5);
     childCountRect.setWidth(childCountRect.width() - 5);
     auto childCount = m_index.data(NodeItem::Roles::ChildCount).toInt();
-    if (m_view->selectionModel()->isSelected(m_index)) {
+
+    if (m_view->selectionModel()->isSelected(m_index))
+    {
         painter.setPen(m_numberOfNotesSelectedColor);
-    } else {
+    }
+    else
+    {
         painter.setPen(m_numberOfNotesColor);
     }
     painter.setFont(m_numberOfNotesFont);

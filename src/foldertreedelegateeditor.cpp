@@ -81,7 +81,7 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
     m_folderIcon->setIconSize(QSize(19, 20));
     QFont materialSymbols("Material Symbols Outlined", 16 + iconPointSizeOffset);
     m_folderIcon->setFont(materialSymbols);
-    m_folderIcon->setText(u8"\ue2c7"); // folder
+    m_folderIcon->setText(u8"\U0001F4C1"); // folder  \ue2c7
     layout->addWidget(m_folderIcon);
     layout->addSpacing(5);
 
@@ -242,11 +242,11 @@ void FolderTreeDelegateEditor::updateDelegate()
     if (m_index.data(NodeItem::Roles::IsExpandable).toBool())
     {
         if (m_view->isExpanded(m_index)) {
-            m_expandIcon->setText(u8"\uf078"); // fa-chevron-down
+            m_expandIcon->setText(u8"\\U000002C5"); // fa-chevron-down
         }
         else
         {
-            m_expandIcon->setText(u8"\uf054"); // fa-chevron-right
+            m_expandIcon->setText(u8"\U000002C3"); // fa-chevron-right
         }
     }
 }

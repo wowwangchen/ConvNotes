@@ -9,5 +9,7 @@
         <file>image/text.png</file>
         <file>image/text_unuse.png</file>
         <file>image/noteList_unuse.png</file>
+        <file>image/down.png</file>
+        <file>image/right.png</file>
     </qresource>
 </RCC>
