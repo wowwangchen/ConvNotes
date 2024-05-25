@@ -41,12 +41,12 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
 {
     setContentsMargins(0, 0, 0, 0);
     auto layout = new QHBoxLayout(this);
-    layout->setContentsMargins(10, 0, 0, 0);
+    layout->setContentsMargins(5, 0, 0, 0);
     layout->setSpacing(0);
     setLayout(layout);
     m_expandIcon = new QLabel(this);
-    m_expandIcon->setMinimumSize({ 11, 11 });
-    m_expandIcon->setMaximumSize({ 11, 11 });
+    m_expandIcon->setMinimumSize({ 18, 20 });
+    m_expandIcon->setMaximumSize({ 18, 20 });
 
     if (m_index.data(NodeItem::Roles::IsExpandable).toBool())
     {
@@ -64,26 +64,30 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
 
     //展开折叠图标
     m_expandIcon->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
-                                                             10 + iconPointSizeOffset));
+                                                             0 + iconPointSizeOffset));
 
     m_expandIcon->setScaledContents(true);
     layout->addWidget(m_expandIcon);
 
     if (!m_index.data(NodeItem::Roles::IsExpandable).toBool()
         || (m_index.data(NodeItem::Roles::IsExpandable).toBool() && m_view->isExpanded(m_index))) {
-        layout->addSpacing(2);
+        //layout->addSpacing(15);
     }
+
+
 
     //文件夹图标
     m_folderIcon = new PushButtonType(parent);
-    m_folderIcon->setMaximumSize({ 19, 20 });
-    m_folderIcon->setMinimumSize({ 19, 20 });
-    m_folderIcon->setIconSize(QSize(19, 20));
-    QFont materialSymbols("Material Symbols Outlined", 16 + iconPointSizeOffset);
+    m_folderIcon->setMaximumSize({ 19, 21 });
+    m_folderIcon->setMinimumSize({ 19, 21 });
+    m_folderIcon->setIconSize(QSize(19, 21));
+    QFont materialSymbols("Material Symbols Outlined", 15 + iconPointSizeOffset);
     m_folderIcon->setFont(materialSymbols);
     m_folderIcon->setText(u8"\U0001F4C1"); // folder  \ue2c7
     layout->addWidget(m_folderIcon);
-    layout->addSpacing(5);
+    layout->addSpacing(27);
+
+
 
 
     //展示的内容
@@ -111,10 +115,10 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
             &LabelEditType::openEditor);
 
     layout->addWidget(m_label);
-    layout->addSpacing(5);
+    layout->addSpacing(10);
     m_contextButton = new PushButtonType(parent);
-    m_contextButton->setMaximumSize({ 33, 25 });
-    m_contextButton->setMinimumSize({ 33, 25 });
+    m_contextButton->setMaximumSize({ 45, 35 });
+    m_contextButton->setMinimumSize({ 45, 35 }); //33 25
     m_contextButton->setCursor(QCursor(Qt::PointingHandCursor));
     m_contextButton->setFocusPolicy(Qt::TabFocus);
     if (m_view->selectionModel()->isSelected(m_index))
@@ -145,6 +149,8 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
     }
 
 
+
+
 #ifdef __APPLE__
     int pointSizeOffset = 0;
 #else
@@ -152,9 +158,12 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
 #endif
 
 
+    //更多选项的按钮
     m_contextButton->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
                                                                 14 + pointSizeOffset));
-    m_contextButton->setText(u8"\uf141"); // fa-ellipsis-h
+    m_contextButton->setText(u8"\U0001F3F5"); // fa-ellipsis-h u8"\uf141
+
+
 
     connect(m_contextButton, &QPushButton::clicked, m_view, [this](bool) {
         auto tree_view = dynamic_cast<myTreeView *>(m_view);
@@ -241,8 +250,9 @@ void FolderTreeDelegateEditor::updateDelegate()
 
     if (m_index.data(NodeItem::Roles::IsExpandable).toBool())
     {
-        if (m_view->isExpanded(m_index)) {
-            m_expandIcon->setText(u8"\\U000002C5"); // fa-chevron-down
+        if (m_view->isExpanded(m_index))
+        {
+            m_expandIcon->setText(u8"\U000002C5"); // fa-chevron-down
         }
         else
         {
@@ -253,6 +263,7 @@ void FolderTreeDelegateEditor::updateDelegate()
 
 void FolderTreeDelegateEditor::paintEvent(QPaintEvent *event)
 {
+    //qDebug()<<__FUNCTION__<<__LINE__<<rect();
     //绘制代理编辑器控件界面
     updateDelegate();
     QPainter painter(this);
@@ -268,7 +279,9 @@ void FolderTreeDelegateEditor::paintEvent(QPaintEvent *event)
             if (m_theme == Theme::Dark)
             {
                 painter.fillRect(rect(), QBrush(QColor(35, 52, 69)));
-            } else {
+            }
+            else
+            {
                 painter.fillRect(rect(), QBrush(QColor(180, 208, 233)));
             }
         }
@@ -286,7 +299,9 @@ void FolderTreeDelegateEditor::mouseDoubleClickEvent(QMouseEvent *event)
     if (m_label->geometry().contains(event->pos()))
     {
         m_label->openEditor();
-    } else {
+    }
+    else
+    {
         QWidget::mouseDoubleClickEvent(event);
     }
 }

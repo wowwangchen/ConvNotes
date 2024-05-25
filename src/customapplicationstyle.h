@@ -4,6 +4,8 @@
 #include <QProxyStyle>
 #include"mytreeview.h"
 #include<QStyleOption>
+
+
 //自定义界面风格代理
 class CustomApplicationStyle : public QProxyStyle
 {

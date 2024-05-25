@@ -69,12 +69,13 @@ void DefaultNoteFolderDelegateEditor::setTheme(Theme::Value theme)
 void DefaultNoteFolderDelegateEditor::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-    auto iconRect = QRect(rect().x() + 4, rect().y() + (rect().height() - 20) / 2, 20, 20);
+    auto iconRect = QRect(rect().x() + 22, rect().y() + (rect().height() - 26) / 2, 38, 40);
 
     QRect folderIconRect(rect());
-    folderIconRect.setLeft(iconRect.x() + iconRect.width());
-    folderIconRect.setTop(rect().y() + 5);
-    folderIconRect.setWidth(18);
+//    folderIconRect.setLeft(iconRect.x() + iconRect.width());
+//    folderIconRect.setTop(rect().y() + 5);
+//    folderIconRect.setWidth(18);
+    folderIconRect=iconRect;
     if (m_view->selectionModel()->isSelected(m_index))
     {
         painter.fillRect(rect(), QBrush(m_activeColor));
@@ -110,7 +111,7 @@ void DefaultNoteFolderDelegateEditor::paintEvent(QPaintEvent *event)
     painter.drawText(folderIconRect, u8"\U0001F4C1"); // folder  \ue2c7
 
     QRect nameRect(rect());
-    nameRect.setLeft(folderIconRect.x() + folderIconRect.width() + 5);
+    nameRect.setLeft(folderIconRect.x() + folderIconRect.width() + 10);
     nameRect.setWidth(nameRect.width() - 5 - 40);
 
     auto displayName = m_index.data(NodeItem::Roles::DisplayText).toString();

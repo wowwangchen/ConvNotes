@@ -612,7 +612,7 @@ void myTreeView::mousePressEvent(QMouseEvent *event)
         {
             //鼠标点击如果是文件夹类型，如果点击了图标处，则更换展开折叠状态
             auto rect = visualRect(index);
-            auto iconRect = QRect(rect.x() + 5, rect.y() + (rect.height() - 20) / 2, 24, 24);
+            auto iconRect = QRect(rect.x() + 5, rect.y() + (rect.height() - 20) / 2, 18, 20);
             if (iconRect.contains(event->pos()))
             {
                 if (isExpanded(index))

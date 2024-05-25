@@ -231,7 +231,7 @@ border:none;
                 </size>
                </property>
                <property name="styleSheet">
-                <string notr="true"/>
+                <string notr="true">color: rgb(85, 255, 255);</string>
                </property>
                <property name="text">
                 <string/>
@@ -344,7 +344,7 @@ border:none;
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>14</width>
+                 <width>18</width>
                  <height>20</height>
                 </size>
                </property>
@@ -366,6 +366,19 @@ border:none;
                </property>
                <property name="toolTip">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QLineEdit {
+    border-radius: 5px; /* 设置圆角半径 */
+    border: 1px solid #cccccc; /* 设置边框 */
+    padding: 5px; /* 设置内边距 */
+    color: #333333; /* 设置字体颜色 */
+}
+
+QLineEdit:focus {
+    border-color: #66afe9; /* 设置获得焦点时的边框颜色 */
+    outline: 0; /* 去除焦点时的默认样式 */
+}</string>
                </property>
                <property name="text">
                 <string/>

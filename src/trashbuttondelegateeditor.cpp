@@ -70,12 +70,12 @@ void TrashButtonDelegateEditor::paintEvent(QPaintEvent *event)
     QPainter painter(this);
 
     //图标
-    auto iconRect = QRect(rect().x() + 22, rect().y() + 2 + (rect().height() - 20) / 2, 18, 20);
+    auto iconRect = QRect(rect().x() + 22, rect().y() + 2 + (rect().height() - 26) / 2, 38, 40);
     auto iconPath = m_index.data(NodeItem::Roles::Icon).toString();
     auto displayName = m_index.data(NodeItem::Roles::DisplayText).toString();
     QRect nameRect(rect());
-    nameRect.setLeft(iconRect.x() + iconRect.width() + 5);
-    nameRect.setWidth(nameRect.width() - 22 - 40);
+    nameRect.setLeft(iconRect.x() + iconRect.width() + 10);
+    nameRect.setWidth(nameRect.width() - 5 - 40);
 
     //根据是否选中设置颜色
     if (m_view->selectionModel()->isSelected(m_index))
