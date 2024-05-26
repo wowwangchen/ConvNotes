@@ -134,8 +134,8 @@ void myTreeViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
 
 
     //填充传入项的区域的背景颜色
-    //painter->fillRect(option.rect, m_currentBackgroundColor);
-    painter->fillRect(option.rect,QBrush(QColor(240,240,240)));
+    painter->fillRect(option.rect, m_currentBackgroundColor);
+    //painter->fillRect(option.rect,QBrush(QColor(240,240,240)));
 
     //根据不同项进行不同的绘制
     switch (itemType)

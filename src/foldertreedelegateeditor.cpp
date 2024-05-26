@@ -32,8 +32,9 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
 
     m_titleColor(26, 26, 26),
     m_titleSelectedColor(255, 255, 255),
-    m_activeColor(68, 138, 201),
-    m_hoverColor(207, 207, 207),
+    m_activeColor(25, 25, 25),
+    //m_activeColor(68, 138, 201),
+    m_hoverColor(207, 207, 207),                //这里有问题，代理编辑器的颜色
     m_folderIconColor(68, 138, 201),
     m_view(view),
     m_listView(listView),
@@ -132,7 +133,7 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
                                                       R"(    border: none; )"
                                                       R"(    padding: 0px; )"
                                                       R"(    color: rgb(210, 210, 210); )"
-                                                      R"(})"));
+                                                      R"(})")); //210, 210, 210
     }
     else
     {
@@ -278,7 +279,7 @@ void FolderTreeDelegateEditor::paintEvent(QPaintEvent *event)
         {
             if (m_theme == Theme::Dark)
             {
-                painter.fillRect(rect(), QBrush(QColor(35, 52, 69)));
+                painter.fillRect(rect(), QBrush(QColor(35, 52, 69)));  //35, 52, 69
             }
             else
             {

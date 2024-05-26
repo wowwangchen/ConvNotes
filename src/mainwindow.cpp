@@ -378,3 +378,11 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 }
 
 
+
+void MainWindow::on_searchButton_clicked()
+{
+    m_currentTheme = Theme::Dark;
+    ui->backFrame->setStyleSheet("background-color: rgb(25, 25, 25);");
+    m_treeViewLogic->setTheme(m_currentTheme);
+}
+

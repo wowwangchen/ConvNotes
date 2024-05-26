@@ -92,6 +92,9 @@ protected:
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
 
 
+private slots:
+    void on_searchButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     //以下全是代指ui界面中的控件

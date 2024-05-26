@@ -11,5 +11,6 @@
         <file>image/noteList_unuse.png</file>
         <file>image/down.png</file>
         <file>image/right.png</file>
+        <file>syles/notelistview.css</file>
     </qresource>
 </RCC>
