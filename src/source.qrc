@@ -12,5 +12,7 @@
         <file>image/down.png</file>
         <file>image/right.png</file>
         <file>syles/notelistview.css</file>
+        <file>image/notepad.ico</file>
+        <file>image/notepads.png</file>
     </qresource>
 </RCC>

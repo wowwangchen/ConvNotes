@@ -17,7 +17,7 @@ myListView::myListView(QWidget *parent) :
     m_isDraggingInsidePinned{ false }
 
 {
-    setAttribute(Qt::WA_MacShowFocusRect, false);  //macoc需要
+    setAttribute(Qt::WA_MacShowFocusRect, false);  //macos需要
 
     setupStyleSheet();
 
@@ -138,8 +138,8 @@ void myListView::openPersistentEditorC(const QModelIndex &index)
     if (index.isValid())
     {
         auto id = index.data(NoteListModel::NoteID).toInt();
-        m_openedEditor[id] = {};
-        openPersistentEditor(index);
+        m_openedEditor[id] = {};        //列表中添加
+        openPersistentEditor(index);    //真正打开持久化编辑器
     }
 }
 
@@ -149,7 +149,7 @@ void myListView::closePersistentEditorC(const QModelIndex &index)
     {
         auto id = index.data(NoteListModel::NoteID).toInt();
         closePersistentEditor(index);
-        m_openedEditor.remove(id);
+        m_openedEditor.remove(id);  //列表成员中移除
     }
 }
 
@@ -600,36 +600,404 @@ void myListView::mouseMoveEvent(QMouseEvent *event)
 
 void myListView::mousePressEvent(QMouseEvent *e)
 {
+    Q_D(myListView);  //指向私有成员的指针
+    m_isMousePressed = true;
 
+    //判断点击的位置的索引是否合法
+    auto index = indexAt(e->pos());
+    if (!index.isValid())
+    {
+        emit noteListViewClicked();
+        return;
+    }
+
+    //判断索引是否为第一个置顶的索引并且点击位置在矩形内，是的话则展开折叠取反
+    auto model = dynamic_cast<NoteListModel *>(this->model());
+    if (model && model->isFirstPinnedNote(index))
+    {
+        auto rect = visualRect(index);
+        auto iconRect = QRect(rect.right() - 25, rect.y() + 2, 20, 20);
+        if (iconRect.contains(e->pos()))
+        {
+            setIsPinnedNotesCollapsed(!isPinnedNotesCollapsed());
+            m_mousePressHandled = true;
+            return;
+        }
+    }
+
+    //如果是左键
+    if (e->button() == Qt::LeftButton)
+    {
+        m_dragStartPosition = e->pos();
+        auto oldIndexes = selectionModel()->selectedIndexes();
+        //如果当前选中的索引没有包含点击的索引
+        if (!oldIndexes.contains(index))
+        {
+            //判断是否按下ctrl，是则进入多选模式，将当前索引添加到选中的索引列表中
+            if (e->modifiers() == Qt::ControlModifier)
+            {
+                setSelectionMode(QAbstractItemView::MultiSelection);
+                setCurrentIndex(index);
+                selectionModel()->setCurrentIndex(index, QItemSelectionModel::SelectCurrent);
+                auto selectedIndexes = selectionModel()->selectedIndexes();
+                emit notePressed(selectedIndexes);
+            }
+            else
+            {
+                setCurrentIndexC(index);
+                emit notePressed({ index });
+            }
+            m_mousePressHandled = true;
+        }
+    }
+
+    //右键点击
+    else if (e->button() == Qt::RightButton)
+    {
+        auto oldIndexes = selectionModel()->selectedIndexes();
+        //之前选中的索引不包含当前点击的索引
+        if (!oldIndexes.contains(index))
+        {
+            setCurrentIndexC(index);
+            emit notePressed({ index });
+        }
+    }
+
+    QPoint offset = d->offset();
+    d->pressedPosition = e->pos() + offset;
 }
 
 void myListView::mouseReleaseEvent(QMouseEvent *e)
 {
+    m_isMousePressed = false;
+    auto index = indexAt(e->pos());
+    if (!index.isValid())
+    {
+        return;
+    }
 
+    //左键点击并且之前的鼠标点击事件未处理
+    if (e->button() == Qt::LeftButton && !m_mousePressHandled)
+    {
+        //点击了ctrl,多选模式
+        if (e->modifiers() == Qt::ControlModifier)
+        {
+            setSelectionMode(QAbstractItemView::MultiSelection);
+            //如果点击的索引在之前选中的索引中，就取消选中
+            auto oldIndexes = selectionModel()->selectedIndexes();
+            if (oldIndexes.contains(index) && oldIndexes.size() > 1)
+            {
+                selectionModel()->select(index, QItemSelectionModel::Deselect);
+            }
+            //不包含就添加选中
+            else
+            {
+                setCurrentIndex(index);
+                selectionModel()->setCurrentIndex(index, QItemSelectionModel::SelectCurrent);
+            }
+            auto selectedIndexes = selectionModel()->selectedIndexes();
+            emit notePressed(selectedIndexes);
+        }
+
+        else
+        {
+            setCurrentIndexC(index);
+            emit notePressed({ index });
+        }
+    }
+
+
+    m_mousePressHandled = false;
+    QListView::mouseReleaseEvent(e);
 }
 
 bool myListView::viewportEvent(QEvent *e)
 {
-    return true;
+    if (model())
+    {
+        switch (e->type())
+        {
+            //鼠标离开事件
+        case QEvent::Leave:
+        {
+            QPoint pt = mapFromGlobal(QCursor::pos());
+            QModelIndex index = indexAt(QPoint(10, pt.y()));
+            //如果行数>0，清除视图的悬停状态，更新上一行的视图
+            if (index.row() > 0)
+            {
+                index = model()->index(index.row() - 1, 0);
+                NoteListDelegate *delegate = dynamic_cast<NoteListDelegate *>(itemDelegate());
+                if (delegate)
+                {
+                    delegate->setHoveredIndex(QModelIndex());
+                    viewport()->update(visualRect(index));
+                }
+            }
+            break;
+        }
+        default:
+            break;
+        }
+
+    }
+
+    return QListView::viewportEvent(e);
 }
 
 void myListView::dragEnterEvent(QDragEnterEvent *event)
 {
-
+    //是否为笔记属性(宏定义)
+    if (event->mimeData()->hasFormat(NOTE_MIME))
+    {
+        event->acceptProposedAction();
+    }
+    else
+    {
+        QListView::dragEnterEvent(event);
+    }
 }
 
 void myListView::dragMoveEvent(QDragMoveEvent *event)
 {
+    //是笔记类型
+    if (event->mimeData()->hasFormat(NOTE_MIME))
+    {
+        auto index = indexAt(event->pos());
+        auto isPinned = index.data(NoteListModel::NoteIsPinned).toBool();
+        //不合法
+        if (!index.isValid())
+        {
+            event->ignore();
+            return;
+        }
+        //不是拖动置顶的笔记，并且当前笔记没有置顶
+        if (!m_isDraggingPinnedNotes && !isPinned)
+        {
+            event->ignore();
+            return;
+        }
 
+        //都满足，设置当前拖动的位置在置顶区内
+        m_isDraggingInsidePinned = isPinned;
+        event->acceptProposedAction();          //接受事件
+        setDropIndicatorShown(true);            //显示拖拽指示器
+        QListView::dragMoveEvent(event);
+        return;
+    }
+
+    else
+    {
+        event->ignore();
+    }
 }
 
 void myListView::scrollContentsBy(int dx, int dy)
 {
+    QListView::scrollContentsBy(dx, dy);
+    auto m_listModel = dynamic_cast<NoteListModel *>(model());
+    if (!m_listModel)
+    {
+        return;
+    }
 
+    //遍历model中所有行
+    for (int i = 0; i < m_listModel->rowCount(); ++i)
+    {
+        auto index = m_listModel->index(i, 0);
+        if (index.isValid())
+        {
+            //根据视口的高度，选择关闭某些超出范围的编辑器
+            auto id = index.data(NoteListModel::NoteID).toInt();
+
+            //当前打开的编辑器包含此节点
+            if (m_openedEditor.contains(id))
+            {
+                auto y = visualRect(index).y();
+                auto range = abs(viewport()->height());
+                if ((y < -range) || (y > 2 * range))
+                {
+                    m_openedEditor.remove(id);
+                    closePersistentEditor(index);
+                }
+            }
+            //如果之前节点的编辑器未打开，但现在在范围内，打开持久化编辑器
+            else
+            {
+                auto y = visualRect(index).y();
+                auto range = abs(viewport()->height());
+                if (y < -range)
+                {
+                    continue;
+                }
+                else if (y > 2 * range) //证明后面的都超了，直接退出
+                {
+                    break;
+                }
+                openPersistentEditorC(index);
+            }
+
+        }
+    }
 }
 
 void myListView::startDrag(Qt::DropActions supportedActions)
 {
+    Q_UNUSED(supportedActions);
+    Q_D(myListView);
+
+    //获取选择的所有索引
+    auto indexes = selectedIndexes();
+    QMimeData *mimeData = d->model->mimeData(indexes);
+    if (!mimeData)
+    {
+        return;
+    }
+    QRect rect;
+    QPixmap pixmap;
+
+    //若只选中了一个
+    if (indexes.size() == 1)
+    {
+        auto current = indexes[0];
+        auto id = current.data(NoteListModel::NoteID).toInt();
+
+        //看持久化编辑器是否包含这个节点
+        if (m_openedEditor.contains(id))
+        {
+            //获取一个截图作为拖动图标
+            QItemViewPaintPairs paintPairs = d->draggablePaintPairs(indexes, &rect);
+            Q_UNUSED(paintPairs);
+
+            //获取对应的值(widget)
+            auto wl = m_openedEditor[id];
+            if (!wl.empty())
+            {
+                pixmap = wl.first()->grab(); //对widget截图
+            }
+            else
+            {
+                qDebug() << __FUNCTION__ << "Dragging row" << current.row()
+                         << "is in opened editor list but editor widget is null";
+            }
+        }
+        else
+        {
+            pixmap = d->renderToPixmap(indexes, &rect);
+        }
+
+
+        //数据模型中又置顶，且第一个置顶与不指定的笔记都是当前节点
+        auto model = dynamic_cast<NoteListModel *>(this->model());
+        if (model && model->hasPinnedNote()
+            && (model->isFirstPinnedNote(current) || model->isFirstUnpinnedNote(current)))
+        {
+            QRect r(0, 25, rect.width(), rect.height() - 25);
+            pixmap = pixmap.copy(r);
+            rect.setHeight(rect.height() - 25);
+        }
+        rect.adjust(horizontalOffset(), verticalOffset(), 0, 0);
+    }
+
+
+
+    //选中了多个，用一个图标代替
+    else
+    {
+        pixmap.load(":/image/notepads.png");
+        pixmap = pixmap.scaled(pixmap.width() / 4, pixmap.height() / 4, Qt::KeepAspectRatio,
+                               Qt::SmoothTransformation);
+
+
+#ifdef __APPLE__
+        QFont m_displayFont(QFont(QStringLiteral("SF Pro Text")).exactMatch()
+                                ? QStringLiteral("SF Pro Text")
+                                : QStringLiteral("Roboto"));
+#elif _WIN32
+        QFont m_displayFont(QFont(QStringLiteral("Segoe UI")).exactMatch()
+                                ? QStringLiteral("Segoe UI")
+                                : QStringLiteral("Roboto"));
+#else
+        QFont m_displayFont(QStringLiteral("Roboto"));
+#endif
+
+
+        //文本字体
+        m_displayFont.setPixelSize(16);
+        QFontMetrics fmContent(m_displayFont);
+        QString sz = QString::number(indexes.size());
+        QRect szRect = fmContent.boundingRect(sz);
+        QPixmap px(pixmap.width() + szRect.width(), pixmap.height());
+        px.fill(Qt::transparent);
+
+        //显示矩形范围
+        QRect nameRect(px.rect());
+        QPainter painter(&px);
+        painter.setPen(Qt::red);
+        painter.drawPixmap(0, 0, pixmap);
+        painter.setFont(m_displayFont);
+        painter.drawText(nameRect, Qt::AlignRight | Qt::AlignBottom, sz);//放到右下角
+        painter.end();
+        std::swap(pixmap, px);
+        rect = px.rect();
+    }
+
+
+    //遍历所有选中的索引,查找是否拖动置顶的笔记
+    m_isDraggingPinnedNotes = false;
+    for (const auto &index : qAsConst(indexes))
+    {
+        //如果其中有置顶的，变量置为true，退出
+        if (index.data(NoteListModel::NoteIsPinned).toBool())
+        {
+            m_isDraggingPinnedNotes = true;
+            break;
+        }
+    }
+
+
+    QDrag *drag = new QDrag(this);  //创造操作发送拖放数据
+    drag->setPixmap(pixmap);
+    drag->setMimeData(mimeData);
+    //设置浏览的图像的热点位置
+    if (indexes.size() == 1)
+    {
+        drag->setHotSpot(d->pressedPosition - rect.topLeft());
+    }
+    else
+    {
+        drag->setHotSpot({ 0, 0 });
+    }
+
+    //获取所有编辑器的widget
+    auto openedEditors = m_openedEditor.keys();
+    m_isDragging = true;
+    Qt::DropAction dropAction = drag->exec(Qt::MoveAction); //进入拖动动作事件循环
+    //用户取消了拖动，释放资源
+    if (dropAction == Qt::IgnoreAction)
+    {
+        drag->deleteLater();
+        mimeData->deleteLater();
+    }
+
+
+#if QT_VERSION > QT_VERSION_CHECK(5, 15, 0)
+    d->dropEventMoved = false;
+#endif
+
+
+    //善后
+    m_isDragging = false;
+    // Reset the drop indicator
+    d->dropIndicatorRect = QRect();
+    d->dropIndicatorPosition = OnItem;
+    closeAllEditor();
+    for (const auto &id : qAsConst(openedEditors))
+    {
+        auto index = dynamic_cast<NoteListModel *>(model())->getNoteIndex(id);
+        openPersistentEditorC(index);
+    }
+    scrollContentsBy(0, 0); //刷新界面
+
 
 }
 

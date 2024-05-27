@@ -98,9 +98,9 @@ void MainWindow::initWindow()
 
 
     //窗口分割比例
-    ui->splitter->setStretchFactor(0, 5);
-    ui->splitter->setStretchFactor(1, 6);
-    ui->splitter->setStretchFactor(2, 18);
+    ui->splitter->setStretchFactor(0, 4);
+    ui->splitter->setStretchFactor(1, 5);
+    ui->splitter->setStretchFactor(2, 26);
 
 
     temp_icon=QIcon(":/image/setting.png");

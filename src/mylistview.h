@@ -6,10 +6,16 @@
 #include<QScrollBar>
 #include<QTimer>
 #include<QMenu>
+#include<QDrag>
+#include<QMimeData>
+#include<QPixmap>
+#include<QFlags>
+//#include<QtWidgets/5.12.9/QtWidgets/private/qabstractitemview_p.h>
 #include"dbmanager.h"
 #include"notelistmodel.h"
 #include"notelistdelegate.h"
 #include"mytreeview.h"
+
 
 class myListViewPrivate;
 
@@ -18,6 +24,10 @@ class myListViewPrivate;
 class myListView : public QListView
 {
     Q_OBJECT
+
+    //QT私有实现模式，公有接口和私有实现细节分离
+    Q_DECLARE_PRIVATE(myListView)  //声明一个私有类型指针
+
 public:
     explicit myListView(QWidget* parent = nullptr);
     ~myListView();
@@ -78,8 +88,10 @@ protected:
     virtual void dragEnterEvent(QDragEnterEvent *event) override;
     virtual void dragMoveEvent(QDragMoveEvent *event) override;
 
+
     // QAbstractScrollArea interface
 protected:
+    //滚动事件处理
     virtual void scrollContentsBy(int dx, int dy) override;
     virtual void startDrag(Qt::DropActions supportedActions) override;
 
@@ -115,7 +127,7 @@ signals:
 private:
     bool                            m_animationEnabled;        //是否手使用动画
     bool                            m_isMousePressed;          //鼠标是否点击
-    bool                            m_mousePressHandled;       //鼠标是否正在操纵
+    bool                            m_mousePressHandled;       //鼠标点击是否被处理
     int                             m_rowHeight;               //行的高度
 
     QMenu*                          contextMenu;               //编辑的菜单
@@ -142,19 +154,16 @@ private:
 
 private:
 
-    //QT私有实现模式，公有接口和私有实现细节分离
-    Q_DECLARE_PRIVATE(myListView)  //声明一个私有类型指针
-
 };
 
 
-class myListViewPrivae : public QAbstractItemViewPrivate
+class myListViewPrivate : public QAbstractItemViewPrivate
 {
     Q_DECLARE_PUBLIC(myTreeView)
 
 public:
-    myListViewPrivae() : QAbstractItemViewPrivate(){};
-    virtual ~myListViewPrivae() { }
+    myListViewPrivate() : QAbstractItemViewPrivate(){};
+    virtual ~myListViewPrivate() { }
 };
 
 

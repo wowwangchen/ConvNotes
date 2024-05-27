@@ -29,6 +29,9 @@ public:
 
     explicit NoteListModel(QObject *parent = nullptr);
     QModelIndex getNoteIndex(int id);
+    bool isFirstPinnedNote(const QModelIndex &index) const;
+     bool hasPinnedNote() const;
+    bool isFirstUnpinnedNote(const QModelIndex &index) const;
 };
 
 #endif // NOTELISTMODEL_H
