@@ -20,6 +20,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     mylistview.cpp \
+    mylistviewlogic.cpp \
     mytreeview.cpp \
     mytreeviewdelegate.cpp \
     mytreeviewlogic.cpp \
@@ -46,6 +47,7 @@ HEADERS += \
     labeledittype.h \
     mainwindow.h \
     mylistview.h \
+    mylistviewlogic.h \
     mytreeview.h \
     mytreeviewdelegate.h \
     mytreeviewlogic.h \

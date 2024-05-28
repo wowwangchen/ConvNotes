@@ -150,7 +150,7 @@ void AllNoteButtonTreeDelegateEditor::paintEvent(QPaintEvent *event)
 
     //子节点数
     auto childCountRect = rect();
-    childCountRect.setLeft(nameRect.right() + 22);
+    childCountRect.setLeft(nameRect.right() + 5);
     childCountRect.setWidth(childCountRect.width() - 5);
     auto childCount = m_index.data(NodeItem::Roles::ChildCount).toInt();
     if (m_view->selectionModel()->isSelected(m_index))

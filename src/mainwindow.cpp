@@ -69,7 +69,14 @@ void MainWindow::setupMainWindow()
 
 void MainWindow::setupModelView()
 {
+    //列表
     m_listView=ui->filesListView;
+    //m_listModel = new NoteListModel(m_listView);
+    //m_listView->setModel(m_listModel);
+    //m_listViewLogic = new ListViewLogic(m_listView, m_listModel, m_searchEdit, m_clearButton,
+                                        //m_tagPool, m_dbManager, this);
+
+
     //文件夹树形结构
     m_treeView = static_cast<myTreeView*>(ui->allPackageTreeView);
     m_treeView->setModel(m_treeModel);
@@ -142,7 +149,7 @@ void MainWindow::initWindow()
     ui->searchLineText->setPlaceholderText("Search");
 
     {
-        QFile t(":/syles/searchButton.css");
+        QFile t(":/syles/searchLineEdit.css");
         if(t.open(QIODevice::ReadOnly))
             ui->searchLineText->setStyleSheet(t.readAll());
         t.close();

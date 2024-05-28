@@ -56,7 +56,7 @@ myTreeViewDelegate::myTreeViewDelegate(QTreeView *view, QObject *parent, QListVi
     m_separatorColor(221, 221, 221),
     m_defaultColor(247, 247, 247),
     m_separatorTextColor(143, 143, 143),
-    m_currentBackgroundColor(255, 255, 255),
+    m_currentBackgroundColor(240, 240, 240),
     m_numberOfNotesColor(26, 26, 26, 127),
     m_numberOfNotesSelectedColor(255, 255, 255),
     m_folderIconColor(68, 138, 201),
@@ -67,14 +67,16 @@ myTreeViewDelegate::myTreeViewDelegate(QTreeView *view, QObject *parent, QListVi
 
 void myTreeViewDelegate::setTheme(Theme::Value theme)
 {
+    qDebug()<<"1";
     emit themeChanged(theme);
     m_theme = theme;
 
     switch (theme)
     {
-
+qDebug()<<"2";
     case Theme::Light:
     {
+qDebug()<<"3";
         m_titleColor = QColor(26, 26, 26);
         m_dateColor = QColor(26, 26, 26);
         m_defaultColor = QColor(247, 247, 247);

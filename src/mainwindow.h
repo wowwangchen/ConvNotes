@@ -18,6 +18,7 @@
 #include"mytreeviewmodel.h"
 #include"customdocument.h"
 #include "codetranslate.h"
+#include"notelistmodel.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -99,9 +100,12 @@ private:
     Ui::MainWindow *ui;
     //以下全是代指ui界面中的控件
     myListView*             m_listView;                     //文件列表结构
+    NoteListModel*          m_listModel;                    //列表的model
+
     myTreeView*             m_treeView;                     //代指文件夹展示treeView
     myTreeViewModel*        m_treeModel;                    //ui->treeView的数据模型
     myTreeViewLogic*        m_treeViewLogic;                //MVD和数据库逻辑统一的类
+
     QPushButton*            m_newNoteButton;                //代指新建文件按钮
     QPushButton*            m_dotsButton;                   //代指更多选项按钮
     QPushButton*            m_searchButton;                 //代指搜索按钮

@@ -32,12 +32,14 @@ public:
     explicit NoteListDelegateEditor(const NoteListDelegate *delegate, myListView *view,
                                     const QStyleOptionViewItem &option, const QModelIndex &index,
                                     QWidget *parent = nullptr);
+public slots:
+
     void setTheme(Theme::Value theme);
     void recalculateSize();
 
 signals:
-    void updateSizeHint();
-    void nearDestroyed();
+    void updateSizeHint(int id, const QSize &sz, const QModelIndex &index);
+    void nearDestroyed(int id, const QModelIndex &index);
 };
 
 #endif // NOTELISTDELEGATEEDITOR_H

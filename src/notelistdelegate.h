@@ -5,6 +5,7 @@
 #include <QObject>
 #include<QTimeLine>
 #include<QQueue>
+#include<QModelIndex>
 #include<QPair>
 #include"mylistview.h"
 
