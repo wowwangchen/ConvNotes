@@ -12,16 +12,80 @@
 //列表中的索引的状态
 enum class NoteListState { Normal, Insert, Remove, MoveOut, MoveIn };
 
+
+
 //列表类的代理
 class NoteListDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
+    //构造函数，初始化各种参数
     explicit NoteListDelegate(myListView *view,QObject *parent = nullptr);
+    //设置传入的索引列表新的状态
     void setState(NoteListState NewState, QModelIndexList indexes);
+    //设置动画
+    void setStateI(NoteListState NewState, const QModelIndexList &indexes);
+    //获取私有成员m_timeline的状态
+    QTimeLine::State animationState();
+    //设置动画持续时间
+    void setAnimationDuration(const int duration);
+
+
+
+    //绘制
+    void paint(QPainter *painter, const QStyleOptionViewItem &option,
+               const QModelIndex &index) const override;
+    //设置大小，主要是调整高度
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+    //设置代理编辑器
+    virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+                                  const QModelIndex &index) const override;
+
+
+    //缓存的大小，少算了一些，提高性能
+    QSize bufferSizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+        //获取当前鼠标悬停的索引
+    const QModelIndex &hoveredIndex() const;
+    //设置当前鼠标悬停的索引
+    void setHoveredIndex(const QModelIndex &hoveredIndex);
+    //设置右边偏移量，用于拖动条
+    void setRowRightOffset(int rowRightOffset);
+    //设置活动状态
     void setActive(bool isActive);
-     void setHoveredIndex(const QModelIndex &hoveredIndex);
-     void setRowRightOffset(int rowRightOffset);
+    //设置主题
+    void setTheme(Theme::Value theme);
+    //获取主题
+    Theme::Value theme() const;
+    //设置是否在allnotes文件夹内
+    void setIsInAllNotes(bool newIsInAllNotes);
+    //返回是否在allnotes内
+    bool isInAllNotes() const;
+    //清除节点对应大小的键值对
+    void clearSizeMap();
+    //判断是否需要绘制分隔符
+    bool shouldPaintSeparator(const QModelIndex &index, const NoteListModel &model) const;
+
+
+private:
+    //绘制背景，矩形大小
+    void paintBackground(QPainter *painter, const QStyleOptionViewItem &option,
+                         const QModelIndex &index) const;
+    //
+    void paintLabels(QPainter *painter, const QStyleOptionViewItem &option,
+                     const QModelIndex &index) const;
+    //绘制分割线
+    void paintSeparator(QPainter *painter, QRect rect, const QModelIndex &index) const;
+    QString parseDateTime(const QDateTime &dateTime) const;
+
+
+
+public slots:
+    //更新某个节点的大小
+    void updateSizeMap(int id, QSize sz, const QModelIndex &index);
+    //移除编辑器
+    void editorDestroyed(int id, const QModelIndex &index);
+
+
 
  signals:
      void themeChanged(Theme::Value theme);

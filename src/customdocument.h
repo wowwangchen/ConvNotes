@@ -3,6 +3,7 @@
 
 #include<QTextEdit>
 
+//自定义文本的
 class CustomDocument : public QTextEdit
 {
 public:

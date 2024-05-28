@@ -27,7 +27,9 @@ SOURCES += \
     nodedata.cpp \
     nodepath.cpp \
     nodetreeitem.cpp \
+    noteeditorlogic.cpp \
     notelistdelegate.cpp \
+    notelistdelegateeditor.cpp \
     notelistmodel.cpp \
     pushbuttontype.cpp \
     trashbuttondelegateeditor.cpp
@@ -51,7 +53,9 @@ HEADERS += \
     nodedata.h \
     nodepath.h \
     nodetreeitem.h \
+    noteeditorlogic.h \
     notelistdelegate.h \
+    notelistdelegateeditor.h \
     notelistmodel.h \
     pushbuttontype.h \
     trashbuttondelegateeditor.h
