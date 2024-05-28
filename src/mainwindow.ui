@@ -368,17 +368,7 @@ border:none;
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="styleSheet">
-                <string notr="true">QLineEdit {
-    border-radius: 5px; /* 设置圆角半径 */
-    border: 1px solid #cccccc; /* 设置边框 */
-    padding: 5px; /* 设置内边距 */
-    color: #333333; /* 设置字体颜色 */
-}
-
-QLineEdit:focus {
-    border-color: #66afe9; /* 设置获得焦点时的边框颜色 */
-    outline: 0; /* 去除焦点时的默认样式 */
-}</string>
+                <string notr="true"/>
                </property>
                <property name="text">
                 <string/>

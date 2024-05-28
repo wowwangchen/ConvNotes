@@ -96,7 +96,8 @@ public:
     QModelIndex getFirstUnpinnedNote() const;
     //是否有置顶的笔记
     bool hasPinnedNote() const;
-    //设置某些笔记是否置顶
+
+    //设置某些笔记是否置顶，同时会进行插入操作
     void setNotesIsPinned(const QModelIndexList &indexes, bool isPinned);
 
 

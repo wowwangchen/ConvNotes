@@ -13,10 +13,10 @@
 //#include<QtWidgets/5.12.9/QtWidgets/private/qabstractitemview_p.h>
 #include"dbmanager.h"
 #include"notelistmodel.h"
-#include"notelistdelegate.h"
 #include"mytreeview.h"
 
 
+enum class NoteListState;
 class myListViewPrivate;
 
 
@@ -24,6 +24,7 @@ class myListViewPrivate;
 class myListView : public QListView
 {
     Q_OBJECT
+
 
     //QT私有实现模式，公有接口和私有实现细节分离
     Q_DECLARE_PRIVATE(myListView)  //声明一个私有类型指针
@@ -159,11 +160,14 @@ private:
 
 class myListViewPrivate : public QAbstractItemViewPrivate
 {
-    Q_DECLARE_PUBLIC(myTreeView)
+    Q_DECLARE_PUBLIC(myListView)
 
 public:
     myListViewPrivate() : QAbstractItemViewPrivate(){};
     virtual ~myListViewPrivate() { }
+    //通过index对应的widget获取截图
+    QPixmap renderToPixmap(const QModelIndexList &indexes, QRect *r) const;
+    QStyleOptionViewItem viewOptionsV1() const;
 };
 
 

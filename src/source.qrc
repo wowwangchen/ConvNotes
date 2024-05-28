@@ -14,5 +14,8 @@
         <file>syles/notelistview.css</file>
         <file>image/notepad.ico</file>
         <file>image/notepads.png</file>
+        <file>syles/searchButton.css</file>
+        <file>syles/nodetreeview.css</file>
+        <file>image/folder.png</file>
     </qresource>
 </RCC>

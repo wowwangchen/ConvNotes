@@ -741,28 +741,39 @@ bool NoteListModel::hasPinnedNote() const
 
 void NoteListModel::setNotesIsPinned(const QModelIndexList &indexes, bool isPinned)
 {
-    emit requestCloseNoteEditor(indexes);
-    QSet<int> needMovingIds;
-    QModelIndexList needMovingIndexes;
+    emit requestCloseNoteEditor(indexes); //关闭传入的索引的编辑器
+    QSet<int> needMovingIds;              //需要移动的节点的id
+    QModelIndexList needMovingIndexes;    //需要移动的节点的index
+
+
+    //遍历传入的indexs,将不是置顶的节点的添加到前面变量中
     for (const auto &index : indexes)
     {
         if (index.isValid())
         {
             NodeData &note = getRef(index.row());
+            //不是置顶
             if (note.isPinnedNote() != isPinned)
             {
+                //添加这个节点
                 needMovingIds.insert(note.id());
                 needMovingIndexes.append(index);
+                //修改参数
                 note.setIsPinnedNote(isPinned);
+                //发送信号通知其他对象
                 emit requestUpdatePinned(note.id(), isPinned);
             }
         }
     }
 
+    //传入的bool值为需要置顶
     if (isPinned)
     {
+        //model即将重置更新
         emit rowsAboutToBeMovedC(needMovingIndexes);
         beginResetModel();
+
+        //遍历刚刚添加的所有节点，设置到置顶区中
         for (const auto &id : qAsConst(needMovingIds))
         {
             auto index = getNoteIndex(id);
@@ -778,6 +789,9 @@ void NoteListModel::setNotesIsPinned(const QModelIndexList &indexes, bool isPinn
             m_pinnedList.prepend(m_noteList.takeAt(sourceRow - m_pinnedList.size()));
         }
         endResetModel();
+
+
+        //遍历刚刚添加的所有节点，全部添加到list中
         QModelIndexList destinations;
         for (const auto &id : needMovingIds)
         {
@@ -788,13 +802,18 @@ void NoteListModel::setNotesIsPinned(const QModelIndexList &indexes, bool isPinn
             }
             destinations.append(index);
         }
+        //发送信号，通知其他成员
         emit selectNotes(destinations);
         emit rowsMovedC(destinations);
         emit rowCountChanged();
         updatePinnedRelativePosition();
     }
+
+    //不需要置顶
     else
     {
+
+        //遍历刚刚获取的所有需要移动的节点的id
         emit rowsAboutToBeMovedC(needMovingIndexes);
         beginResetModel();
         for (const auto &id : qAsConst(needMovingIds))
@@ -804,7 +823,10 @@ void NoteListModel::setNotesIsPinned(const QModelIndexList &indexes, bool isPinn
             {
                 continue;
             }
+
+
             int destinationChild = 0;
+                    //如果父节点是垃圾桶，根据删除时间寻找插入的位置
             if (m_listViewInfo.parentFolderId == SpecialNodeID::TrashFolder)
             {
                 auto lastMod = index.data(NoteDeletionDateTime).toDateTime();
@@ -818,6 +840,7 @@ void NoteListModel::setNotesIsPinned(const QModelIndexList &indexes, bool isPinn
                     }
                 }
             }
+            //不是垃圾桶，根据上次修改时间来判断插入位置
             else
             {
                 auto lastMod = index.data(NoteLastModificationDateTime).toDateTime();
@@ -832,8 +855,13 @@ void NoteListModel::setNotesIsPinned(const QModelIndexList &indexes, bool isPinn
                 }
             }
             m_noteList.insert(destinationChild, m_pinnedList.takeAt(index.row()));
-        }
+
+        }//for
         endResetModel();
+
+
+
+        //获取所有要移动的节点的index
         QModelIndexList destinations;
         for (const auto &id : needMovingIds)
         {
@@ -849,26 +877,47 @@ void NoteListModel::setNotesIsPinned(const QModelIndexList &indexes, bool isPinn
         emit rowCountChanged();
         updatePinnedRelativePosition();
     }
+
 }
 
 void NoteListModel::updatePinnedRelativePosition()
 {
-
+    //遍历所有置顶区的笔记
+    for (int i = 0; i < m_pinnedList.size(); ++i)
+    {
+        //如果不是在所有笔记文件夹内
+        if (!isInAllNote())
+        {
+            emit requestUpdatePinnedRelPos(m_pinnedList[i].id(), i);  //发送更新相对位置
+        }
+        else
+        {
+            emit requestUpdatePinnedRelPosAN(m_pinnedList[i].id(), i); //发送跟新相对位置allnote
+        }
+    }
 }
 
 bool NoteListModel::isInAllNote() const
 {
-
+    //判断父节点是否为根节点即可
+    return (m_listViewInfo.parentFolderId == SpecialNodeID::RootFolder);
 }
 
 NodeData &NoteListModel::getRef(int row)
 {
+    //通过row后去nodedata
 
+    //根据是否为置顶区范围，分类查找
+    if (row < m_pinnedList.size())
+        return m_pinnedList[row];
+    return m_noteList[row - m_pinnedList.size()];
 }
 
 const NodeData &NoteListModel::getRef(int row) const
 {
-
+    if (row < m_pinnedList.size())
+        return m_pinnedList[row];
+    return m_noteList[row - m_pinnedList.size()];
 }
 
 

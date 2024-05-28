@@ -1,5 +1,5 @@
 #include "mylistview.h"
-
+#include "notelistdelegate.h"
 
 
 myListView::myListView(QWidget *parent) :
@@ -402,7 +402,7 @@ void myListView::onCustomContextMenu(QPoint point)
                         if (selectedIndex.isValid())
                         {
                             emit moveNoteRequested(
-                                    selectedIndex.data(NoteListModel::NoteID).toInt(), id);
+                                selectedIndex.data(NoteListModel::NoteID).toInt(), id);
                         }
                     }
                 });
@@ -1006,3 +1006,74 @@ void myListView::setDbManager(DBManager *newDbManager)
     m_dbManager = newDbManager;
 }
 
+
+QPixmap myListViewPrivate::renderToPixmap(const QModelIndexList &indexes, QRect *r) const
+{
+    //检查是否有效
+    Q_ASSERT(r);
+
+    QItemViewPaintPairs paintPairs = draggablePaintPairs(indexes, r); //存储一对index与rect
+    if (paintPairs.isEmpty())
+        return QPixmap();
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    qreal scale = 1.0f;
+    Q_Q(const QAbstractItemView);  //获取当前类的指针
+
+    //获取当前窗口的设备像素比
+    QWidget *window = q->window();
+    if (window)
+    {
+        QWindow *windowHandle = window->windowHandle();
+        if (windowHandle)
+            scale = windowHandle->devicePixelRatio();
+    }
+#else
+    QWindow *window = windowHandle(WindowHandleMode::Closest);
+    const qreal scale = window ? window->devicePixelRatio() : qreal(1);
+#endif
+
+
+    //设置截图的大小
+    QPixmap pixmap(r->size() * scale);
+    pixmap.setDevicePixelRatio(scale);
+
+    pixmap.fill(Qt::transparent); //背景为透明
+
+
+    QPainter painter(&pixmap);
+    //获取列表视图的各种属性
+    QStyleOptionViewItem option = viewOptionsV1();
+    option.state |= QStyle::State_Selected; //+选中状态
+
+    //获取全部索引矩形对，获取矩形位置，在当前项目的委托对象上绘制
+    for (int j = 0; j < paintPairs.count(); ++j)
+    {
+        option.rect = paintPairs.at(j).rect.translated(-r->topLeft());
+        const QModelIndex &current = paintPairs.at(j).index;
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        Q_Q(const QAbstractItemView);
+        adjustViewOptionsForIndex(&option, current);
+        q->itemDelegateForIndex(current)->paint(&painter, option, current);
+#else
+        delegateForIndex(current)->paint(&painter, option, current);
+#endif
+    }
+
+    return pixmap;
+}
+
+QStyleOptionViewItem myListViewPrivate::viewOptionsV1() const
+{
+    Q_Q(const myListView);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QStyleOptionViewItem option;
+    q->initViewItemOption(&option);
+    return option;
+#else
+    return q->viewOptions();
+#endif
+
+}

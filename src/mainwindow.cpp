@@ -140,23 +140,21 @@ void MainWindow::initWindow()
     ui->lastChangeDateLabel->setText(formattedDateTime);
 
     ui->searchLineText->setPlaceholderText("Search");
-    QString str = QString::fromUtf8(u8"\U0001F5D1");
 
+    {
+        QFile t(":/syles/searchButton.css");
+        if(t.open(QIODevice::ReadOnly))
+            ui->searchLineText->setStyleSheet(t.readAll());
+        t.close();
+    }
 
-    ui->allPackageTreeView->setStyleSheet(R"(
-    QTreeView{background-color: transparent;
-    border:none;}
-    QTreeView::branch:has-children:!has-siblings:closed,
-    QTreeView::branch:closed:has-children:has-siblings {
-        border-image: none;
-        image: none;
+    {
+        //去掉整个tree的展开折叠图标
+        QFile t(":/syles/nodetreeview.css");
+        if(t.open(QIODevice::ReadOnly))
+            ui->allPackageTreeView->setStyleSheet(t.readAll());
+        t.close();
     }
-    QTreeView::branch:open:has-children:!has-siblings,
-    QTreeView::branch:open:has-children:has-siblings {
-        border-image: none;
-        image: none;
-    }
-)");
 
 
 
