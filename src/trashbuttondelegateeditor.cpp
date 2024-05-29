@@ -70,8 +70,9 @@ void TrashButtonDelegateEditor::paintEvent(QPaintEvent *event)
     QPainter painter(this);
 
     //图标
-    auto iconRect = QRect(rect().x() + 22, rect().y() + 2 + (rect().height() - 26) / 2, 38, 40);
-    auto iconPath = m_index.data(NodeItem::Roles::Icon).toString();
+    auto iconRect = QRect(rect().x() + 22, rect().y() + 2 + (rect().height() - 15) / 2, 45, 45);
+    //auto iconPath = m_index.data(NodeItem::Roles::Icon).toString();
+    auto iconPath=u8"\uf1f8";
     auto displayName = m_index.data(NodeItem::Roles::DisplayText).toString();
     QRect nameRect(rect());
     nameRect.setLeft(iconRect.x() + iconRect.width() + 10);
@@ -113,9 +114,10 @@ void TrashButtonDelegateEditor::paintEvent(QPaintEvent *event)
 #endif
 
     //字体
-    painter.setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
-                                                       16 + iconPointSizeOffset));
-    painter.drawText(iconRect, iconPath); // fa-trash
+    //painter.setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
+                                                       //16 + iconPointSizeOffset));
+    painter.setFont(FontLoader::getInstance().getFont());
+    painter.drawText(iconRect, u8"\uf1f8"); // fa-trash
     //颜色
     if (m_view->selectionModel()->isSelected(m_index))
     {

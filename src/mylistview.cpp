@@ -501,6 +501,44 @@ void myListView::selectionChanged(const QItemSelection &selected, const QItemSel
     emit saveSelectedNote(ids);
 }
 
+void myListView::rowsAboutToBeMoved(const QModelIndexList &source)
+{
+    NoteListDelegate *delegate = dynamic_cast<NoteListDelegate *>(itemDelegate());
+
+    if (delegate)
+    {
+        if (m_animationEnabled)
+        {
+            delegate->setState(NoteListState::MoveOut, source);
+        }
+        else
+        {
+            delegate->setState(NoteListState::Normal, source);
+        }
+    }
+}
+
+void myListView::rowsMoved(const QModelIndexList &dest)
+{
+    NoteListDelegate *delegate = dynamic_cast<NoteListDelegate *>(itemDelegate());
+    if (delegate)
+    {
+        if (m_animationEnabled)
+        {
+            delegate->setState(NoteListState::Insert, dest);
+        }
+        else
+        {
+            delegate->setState(NoteListState::Normal, dest);
+        }
+    }
+}
+
+void myListView::onRowsInserted(const QModelIndexList &rows)
+{
+    animateAddedRow(rows);
+}
+
 void myListView::setupSignalsSlots()
 {
     // remove/add separator

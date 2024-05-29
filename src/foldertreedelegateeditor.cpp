@@ -42,7 +42,7 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
 {
     setContentsMargins(0, 0, 0, 0);
     auto layout = new QHBoxLayout(this);
-    layout->setContentsMargins(5, 0, 0, 0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     setLayout(layout);
     m_expandIcon = new QLabel(this);
@@ -53,7 +53,7 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
     {
         if (!m_view->isExpanded(m_index))
         {
-            layout->addSpacing(2);
+            layout->addSpacing(10);
         }
     }
 
@@ -64,15 +64,16 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
 #endif
 
     //展开折叠图标
-    m_expandIcon->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
-                                                             0 + iconPointSizeOffset));
+//    m_expandIcon->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
+//                                                             0 + iconPointSizeOffset));
+    m_expandIcon->setFont(FontLoader::getInstance().getFont());
 
     m_expandIcon->setScaledContents(true);
     layout->addWidget(m_expandIcon);
 
     if (!m_index.data(NodeItem::Roles::IsExpandable).toBool()
         || (m_index.data(NodeItem::Roles::IsExpandable).toBool() && m_view->isExpanded(m_index))) {
-        //layout->addSpacing(15);
+        layout->addSpacing(10);
     }
 
 
@@ -82,11 +83,12 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
     m_folderIcon->setMaximumSize({ 19, 21 });
     m_folderIcon->setMinimumSize({ 19, 21 });
     m_folderIcon->setIconSize(QSize(19, 21));
-    QFont materialSymbols("Material Symbols Outlined", 15 + iconPointSizeOffset);
-    m_folderIcon->setFont(materialSymbols);
-    m_folderIcon->setText(u8"\U0001F4C1"); // folder  \ue2c7
+    //QFont materialSymbols("Material Symbols Outlined", 15 + iconPointSizeOffset);
+    //m_folderIcon->setFont(materialSymbols);
+    m_folderIcon->setFont(FontLoader::getInstance().getFont());
+    m_folderIcon->setText(u8"\uf07b"); // folder  \ue2c7  uf07b
     layout->addWidget(m_folderIcon);
-    layout->addSpacing(27);
+    layout->addSpacing(35);
 
 
 
@@ -160,9 +162,10 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
 
 
     //更多选项的按钮
-    m_contextButton->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
-                                                                14 + pointSizeOffset));
-    m_contextButton->setText(u8"\U0001F3F5"); // fa-ellipsis-h u8"\uf141
+//    m_contextButton->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
+//                                                                14 + pointSizeOffset));
+    m_contextButton->setFont(FontLoader::getInstance().getFont());
+    m_contextButton->setText(u8"\uf141"); // fa-ellipsis-h u8"\uf141 \U0001F3F5
 
 
 
@@ -253,11 +256,11 @@ void FolderTreeDelegateEditor::updateDelegate()
     {
         if (m_view->isExpanded(m_index))
         {
-            m_expandIcon->setText(u8"\U000002C5"); // fa-chevron-down
+            m_expandIcon->setText(u8"\uf078"); // fa-chevron-down
         }
         else
         {
-            m_expandIcon->setText(u8"\U000002C3"); // fa-chevron-right
+            m_expandIcon->setText(u8"\uf054"); // fa-chevron-right
         }
     }
 }

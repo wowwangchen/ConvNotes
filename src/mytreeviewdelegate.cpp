@@ -157,7 +157,7 @@ void myTreeViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
         //图标的位置
 
         auto iconRect = QRect(option.rect.x() + 22,  //+22
-                              option.rect.y() + (option.rect.height() - 26) / 2, 38, 40); //18 20
+                              option.rect.y() + (option.rect.height() - 15) / 2, 45, 45); //18 20
         //qDebug()<<__FUNCTION__<<option.rect;
         //painter之前的字体留个备份
         QFont previousPainterFont = painter->font();
@@ -180,16 +180,18 @@ void myTreeViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
         {
             if (itemType == NodeItem::Type::AllNoteButton)  //黑色主题，所有笔记
             {
-                painter->setFont(FontLoader::getInstance().loadFont("Material Symbols Outlined", "",
-                                                                    16 + iconPointSizeOffset));
-                painter->drawText(iconRect, u8"\U0001F4C1"); // folder图标  \ue2c7
+//                painter->setFont(FontLoader::getInstance().loadFont("Material Symbols Outlined", "",
+//                                                                    16 + iconPointSizeOffset));
+                painter->setFont(FontLoader::getInstance().getFont());
+                painter->drawText(iconRect, u8"\uf07b"); // folder图标  \ue2c7  \U0001F4C1
             }
             else if (itemType == NodeItem::Type::TrashButton)//黑色主题，垃圾桶
             {
                 iconRect.setY(iconRect.y() + 2);
-                painter->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
-                                                                    16 + iconPointSizeOffset));
-                painter->drawText(iconRect, u8"\U0001F5D1"); // fa-trash图标  \U0001F5D1 \uf1f8
+//                painter->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
+//                                                                    16 + iconPointSizeOffset));
+                 painter->setFont(FontLoader::getInstance().getFont());
+                painter->drawText(iconRect, u8"\uf1f8"); // fa-trash图标  \U0001F5D1 \uf1f8
             }
         }
 
@@ -198,16 +200,18 @@ void myTreeViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
             auto iconPath = index.data(NodeItem::Roles::Icon).toString(); //索引对应的图标的位置
             if (itemType == NodeItem::Type::AllNoteButton)      //浅色主题，所有笔记
             {
-                painter->setFont(FontLoader::getInstance().loadFont("Material Symbols Outlined", "",
-                                                                    16 + iconPointSizeOffset));
-                painter->drawText(iconRect, iconPath); // folder
+//                painter->setFont(FontLoader::getInstance().loadFont("Material Symbols Outlined", "",
+//                                                                    16 + iconPointSizeOffset));
+                 painter->setFont(FontLoader::getInstance().getFont());
+                painter->drawText(iconRect, u8"\uf07b"); // folder  \uf07b
             }
             else if(itemType == NodeItem::Type::TrashButton)           //浅色主题，垃圾桶
             {
                 iconRect.setY(iconRect.y() + 2);
-                painter->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
-                                                                    16 + iconPointSizeOffset));
-                painter->drawText(iconRect, iconPath); // fa-trash
+//                painter->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
+//                                                                    16 + iconPointSizeOffset));
+                 painter->setFont(FontLoader::getInstance().getFont());
+                painter->drawText(iconRect, u8"\uf1f8"); // fa-trash
             }
         }
 
@@ -298,10 +302,11 @@ void myTreeViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
 
         //展开折叠的图标
         auto iconRect = QRect(option.rect.x() + 5,
-                              option.rect.y() + (option.rect.height() - 20) / 2, 18, 20);
+                              option.rect.y() + (option.rect.height() - 15) / 2, 18, 20);
         QString iconPath;  //图标
-        painter->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
-                                                            10 + iconPointSizeOffset));
+//        painter->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
+//                                                            10 + iconPointSizeOffset));
+         painter->setFont(FontLoader::getInstance().getFont());
 
         //根据主题的深浅色来选择图标的显示内容
         if (m_theme == Theme::Dark)
@@ -311,11 +316,11 @@ void myTreeViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
             //根据文件夹打开折叠来选择图标
             if ((option.state & QStyle::State_Open) == QStyle::State_Open)  //图标内容
             {
-                iconPath = u8"\U000002C5"; // fa-chevron-down   \uf078
+                iconPath = u8"\uf078"; // fa-chevron-down   \uf078 \U000002C5
             }
             else
             {
-                iconPath = u8"\U000002C3"; // fa-chevron-right
+                iconPath = u8"\uf054"; // fa-chevron-right
                 iconRect.setX(iconRect.x() + 2);
             }
         }
@@ -324,11 +329,11 @@ void myTreeViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
             painter->setPen(QColor(103, 99, 105));
             if ((option.state & QStyle::State_Open) == QStyle::State_Open)
             {
-                iconPath = u8"\U000002C5"; // fa-chevron-down  \uf078   U+02C5
+                iconPath = u8"\uf078 "; // fa-chevron-down  \uf078   U+02C5
             }
             else
             {
-                iconPath = u8"\U000002C3"; // fa-chevron-right U+02C3 \uf054
+                iconPath = u8"\uf054"; // fa-chevron-right U+02C3 \uf054
                 iconRect.setX(iconRect.x() + 2);
             }
         }
@@ -347,7 +352,7 @@ void myTreeViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
 //        folderIconRect.setLeft(iconRect.x() + iconRect.width() + 2);
 //        folderIconRect.setTop(option.rect.y() + 10);
 //        folderIconRect.setWidth(18);
-        QRect folderIconRect = QRect(option.rect.x() + 22, option.rect.y() + (option.rect.height() - 26) / 2, 38, 40);
+        QRect folderIconRect = QRect(option.rect.x() + 30, option.rect.y() + (option.rect.height() - 15) / 2, 45, 45);
         //根据是否被选择设置颜色
         if ((option.state & QStyle::State_Selected) == QStyle::State_Selected)
         {
@@ -357,9 +362,10 @@ void myTreeViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
         {
             painter->setPen(m_folderIconColor);
         }
-        painter->setFont(FontLoader::getInstance().loadFont("Material Symbols Outlined", "",
-                                                            16 + iconPointSizeOffset)); //字体
-        painter->drawText(folderIconRect, u8"\U0001F4C1"); // folder图标   \ue2c7
+//        painter->setFont(FontLoader::getInstance().loadFont("Material Symbols Outlined", "",
+//                                                            16 + iconPointSizeOffset)); //字体
+         painter->setFont(FontLoader::getInstance().getFont());
+        painter->drawText(folderIconRect, u8"\uf07b"); // folder图标   \ue2c7 \U0001F4C1
 
 
 
@@ -513,9 +519,10 @@ QWidget *myTreeViewDelegate::createEditor
 #endif
 
         //设置按钮的字体、图标、样式表
-        addButton->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
-                                                              16 + iconPointSizeOffset));
-        addButton->setText(u8"\U00002795"); // fa_plus  \U0000002B \uf067
+//        addButton->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
+//                                                              16 + iconPointSizeOffset));
+        addButton->setFont(FontLoader::getInstance().getFont());
+        addButton->setText(u8"\uf067"); // fa_plus  \U0000002B \uf067 \U00002795
         addButton->setStyleSheet(QStringLiteral(R"(QPushButton { )"
                                                 R"(    border: none; )"
                                                 R"(    padding: 0px; )"
@@ -566,7 +573,7 @@ QWidget *myTreeViewDelegate::createEditor
 
         else
         {
-            qDebug()<<__FUNCTION__<<__LINE__<<"folder";
+            //qDebug()<<__FUNCTION__<<__LINE__<<"folder";
             auto widget = new FolderTreeDelegateEditor(m_view, option, index, m_listView, parent);
             widget->setTheme(m_theme);
             connect(this, &myTreeViewDelegate::themeChanged, widget,

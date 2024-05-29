@@ -80,7 +80,8 @@ void AllNoteButtonTreeDelegateEditor::paintEvent(QPaintEvent *event)
     QPainter painter(this);
 
     //图标
-    auto iconRect = QRect(rect().x() + 22, rect().y() + (rect().height() - 26) / 2, 38, 40);
+
+    auto iconRect = QRect(rect().x() + 22, rect().y() + (rect().height() - 14) / 2, 45, 45);
     auto iconPath = m_index.data(NodeItem::Roles::Icon).toString();
     //名称
     auto displayName = m_index.data(NodeItem::Roles::DisplayText).toString();
@@ -128,9 +129,11 @@ void AllNoteButtonTreeDelegateEditor::paintEvent(QPaintEvent *event)
 
 
     //图标
-    painter.setFont(FontLoader::getInstance().loadFont("Material Symbols Outlined", "",
-                                                       16 + iconPointSizeOffset));
-    painter.drawText(iconRect, iconPath); // folder
+//    painter.setFont(FontLoader::getInstance().loadFont("Material Symbols Outlined", "",
+//                                                       16 + iconPointSizeOffset));
+
+    painter.setFont(FontLoader::getInstance().getFont());
+    painter.drawText(iconRect,u8"\uf07b"); // folder
 
 
 
@@ -145,6 +148,7 @@ void AllNoteButtonTreeDelegateEditor::paintEvent(QPaintEvent *event)
     }
 
     painter.setFont(m_titleFont);
+    //painter.setFont(FontLoader::getInstance().getFont());
     painter.drawText(nameRect, Qt::AlignLeft | Qt::AlignVCenter, displayName);
 
 
@@ -162,6 +166,7 @@ void AllNoteButtonTreeDelegateEditor::paintEvent(QPaintEvent *event)
         painter.setPen(m_numberOfNotesColor);
     }
     painter.setFont(m_numberOfNotesFont);
+     //painter.setFont(FontLoader::getInstance().getFont());
     painter.drawText(childCountRect, Qt::AlignHCenter | Qt::AlignVCenter,
                      QString::number(childCount));
 

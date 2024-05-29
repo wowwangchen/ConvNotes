@@ -792,18 +792,19 @@ void NoteListDelegate::paintLabels(QPainter *painter, const QStyleOptionViewItem
 #endif
 
                 //设置展开折叠图标
-                painter->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
-                                                                    14 + iconPointSizeOffset));
+//                painter->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
+//                                                                    14 + iconPointSizeOffset));
+                painter->setFont(FontLoader::getInstance().getFont());
                 painter->setPen(QColor(68, 138, 201));
                 if (m_view->isPinnedNotesCollapsed())
                 {
                     painter->drawText(QRect(headerRect.right() - 25, headerRect.y() + 5, 16, 16),
-                                      u8"\U000002C5"); // fa-chevron-right u8"\U000002C5  u8"\uf054"
+                                      u8"\uf054"); // fa-chevron-right u8"\U000002C5  u8"\uf054"
                 }
                 else
                 {
                     painter->drawText(QRect(headerRect.right() - 25, headerRect.y() + 5, 16, 16),
-                                      u8"\U000002C3"); // fa-chevron-down  u8"\uf078"
+                                      u8"\uf078"); // fa-chevron-down  u8"\uf078"
                 }
                 painter->setPen(m_contentColor);
                 painter->setFont(m_headerFont);
@@ -875,20 +876,21 @@ void NoteListDelegate::paintLabels(QPainter *painter, const QStyleOptionViewItem
 #endif
 
 
-                painter->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
-                                                                    14 + iconPointSizeOffset));
+//                painter->setFont(FontLoader::getInstance().loadFont("Font Awesome 6 Free Solid", "",
+//                                                                    14 + iconPointSizeOffset));
+                painter->setFont(FontLoader::getInstance().getFont());
                 painter->setPen(QColor(68, 138, 201));
 
                 //折叠展开图标
                 if (m_view->isPinnedNotesCollapsed())
                 {
                     painter->drawText(QRect(headerRect.right() - 25, headerRect.y() + 5, 16, 16),
-                                      u8"\U000002C5"); // fa-chevron-right
+                                      u8"\uf054"); // fa-chevron-right
                 }
                 else
                 {
                     painter->drawText(QRect(headerRect.right() - 25, headerRect.y() + 5, 16, 16),
-                                      u8"\U000002C3"); // fa-chevron-down
+                                      u8"\uf078"); // fa-chevron-down
                 }
                 //置顶抬头的标题
                 painter->setPen(m_contentColor);

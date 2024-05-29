@@ -17,5 +17,6 @@
         <file>syles/searchLineEdit.css</file>
         <file>syles/nodetreeview.css</file>
         <file>image/folder.png</file>
+        <file>syles/fontawesome-webfont.ttf</file>
     </qresource>
 </RCC>

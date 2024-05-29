@@ -69,7 +69,7 @@ void DefaultNoteFolderDelegateEditor::setTheme(Theme::Value theme)
 void DefaultNoteFolderDelegateEditor::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-    auto iconRect = QRect(rect().x() + 22, rect().y() + (rect().height() - 26) / 2, 38, 40);
+    auto iconRect = QRect(rect().x() + 30, rect().y() + (rect().height() - 15) / 2, 45, 45);
 
     QRect folderIconRect(rect());
 //    folderIconRect.setLeft(iconRect.x() + iconRect.width());
@@ -106,9 +106,10 @@ void DefaultNoteFolderDelegateEditor::paintEvent(QPaintEvent *event)
 #else
     int iconPointSizeOffset = -4;
 #endif
-    painter.setFont(FontLoader::getInstance().loadFont("Material Symbols Outlined", "",
-                                                       16 + iconPointSizeOffset));
-    painter.drawText(folderIconRect, u8"\U0001F4C1"); // folder  \ue2c7
+//    painter.setFont(FontLoader::getInstance().loadFont("Material Symbols Outlined", "",
+//                                                       16 + iconPointSizeOffset));
+    painter.setFont(FontLoader::getInstance().getFont());
+    painter.drawText(folderIconRect, u8"\uf07b"); // folder  \ue2c7 \U0001F4C1
 
     QRect nameRect(rect());
     nameRect.setLeft(folderIconRect.x() + folderIconRect.width() + 10);

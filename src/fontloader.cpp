@@ -3,16 +3,28 @@
 
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-FontLoader::FontLoader() : m_fontDatabase() { }
-#endif
-
-
-
-QFont FontLoader::loadFont(const QString &family, const QString &style, int pointSize)
+FontLoader::FontLoader()
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    return m_fontDatabase.font(family, style, pointSize);
-#else
-    return QFontDatabase::font(family, style, pointSize);
+    // add font file
+    int fontId = QFontDatabase::addApplicationFont(":/syles/fontawesome-webfont.ttf");
+    QStringList fontFamilies = QFontDatabase::applicationFontFamilies(fontId);
+
+    Q_ASSERT_X(fontFamilies.size()==1,"font","font not exist.");
+
+    this->font.setFamily(fontFamilies.at(0));
+
+
+}
 #endif
+
+
+
+QChar FontLoader::getIconChar(IconIdentity code)
+{
+    return QChar((int)code);
+}
+
+QFont FontLoader::getFont()
+{
+    return this->font;
 }

@@ -109,6 +109,12 @@ public slots:
     //视图中的选择发生改变
     void selectionChanged(const QItemSelection &selected,
                           const QItemSelection &deselected) override;
+    //某些行即将被移除
+    void rowsAboutToBeMoved(const QModelIndexList &source);
+    //某些行即将被移入
+    void rowsMoved(const QModelIndexList &dest);
+    //插入某些行
+    void onRowsInserted(const QModelIndexList &rows);
 
 
 signals:
@@ -126,7 +132,7 @@ signals:
 
 
 private:
-    bool                            m_animationEnabled;        //是否手使用动画
+    bool                            m_animationEnabled;        //是否使用动画
     bool                            m_isMousePressed;          //鼠标是否点击
     bool                            m_mousePressHandled;       //鼠标点击是否被处理
     int                             m_rowHeight;               //行的高度

@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
     setupModelView();
     initWindow();
     initConnect();
+    setupSearchEdit();
 
     connect(this, &MainWindow::requestNodesTree, m_dbManager, &DBManager::onNodeTagTreeRequested,
             Qt::BlockingQueuedConnection);
@@ -44,6 +45,47 @@ MainWindow::~MainWindow()
     m_dbThread->quit();
     m_dbThread->wait();
     delete m_dbThread;
+}
+
+void MainWindow::setupSearchEdit()
+{
+
+//    m_searchEdit->setAttribute(Qt::WA_MacShowFocusRect, 0);
+
+//    QFont fontAwesomeIcon("Font Awesome 6 Free Solid");
+//#if defined(Q_OS_MACOS)
+//    int pointSizeOffset = 0;
+//#else
+//    int pointSizeOffset = -4;
+//#endif
+
+
+//    // clear button
+//    m_clearButton = new QToolButton(m_searchEdit);
+//    fontAwesomeIcon.setPointSize(15 + pointSizeOffset);
+//    m_clearButton->setStyleSheet("QToolButton { color: rgb(114, 114, 114) }");
+//    m_clearButton->setFont(fontAwesomeIcon);
+//    m_clearButton->setText(u8"\uf057"); // fa-circle-xmark
+//    m_clearButton->setCursor(Qt::ArrowCursor);
+//    m_clearButton->hide();
+
+//    // search button
+//    m_searchButton = new QToolButton(m_searchEdit);
+//    fontAwesomeIcon.setPointSize(9 + pointSizeOffset);
+//    m_searchButton->setStyleSheet("QToolButton { color: rgb(205, 205, 205) }");
+//    m_searchButton->setFont(fontAwesomeIcon);
+//    m_searchButton->setText(u8"\uf002"); // fa-magnifying-glass
+//    m_searchButton->setCursor(Qt::ArrowCursor);
+
+//    // layout
+//    QBoxLayout *layout = new QBoxLayout(QBoxLayout::RightToLeft, m_searchEdit);
+//    layout->setContentsMargins(2, 0, 3, 0);
+//    layout->addWidget(m_clearButton);
+//    layout->addStretch();
+//    layout->addWidget(m_searchButton);
+//    m_searchEdit->setLayout(layout);
+
+//    m_searchEdit->installEventFilter(this);
 }
 
 void MainWindow::setupMainWindow()
@@ -71,10 +113,10 @@ void MainWindow::setupModelView()
 {
     //列表
     m_listView=ui->filesListView;
-    //m_listModel = new NoteListModel(m_listView);
-    //m_listView->setModel(m_listModel);
-    //m_listViewLogic = new ListViewLogic(m_listView, m_listModel, m_searchEdit, m_clearButton,
-                                        //m_tagPool, m_dbManager, this);
+    m_listModel = new NoteListModel(m_listView);
+    m_listView->setModel(m_listModel);
+    m_listViewLogic = new myListViewLogic(m_listView, m_listModel, m_searchEdit, m_clearButton,
+                                         m_dbManager, this);
 
 
     //文件夹树形结构

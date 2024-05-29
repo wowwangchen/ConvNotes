@@ -19,6 +19,7 @@
 #include"customdocument.h"
 #include "codetranslate.h"
 #include"notelistmodel.h"
+#include"mylistviewlogic.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -71,6 +72,8 @@ public:
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+private:
+    void    setupSearchEdit();                      //初始化搜索相关的内容
     void    setupMainWindow();                      //初始化主界面
     void    initWindow();                           //初始化窗口
     void    setDataBase();                          //初始化数据库
@@ -78,6 +81,7 @@ public:
     void    setupModelView();                       //初始化模型视图
     void    setColorDialogSS(QColorDialog *dialog);
     void    initializeSettingsDatabase();           //初始化程序设置数据库
+
 
 public slots:
     void settingButton_clicked();
@@ -98,9 +102,11 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+
     //以下全是代指ui界面中的控件
     myListView*             m_listView;                     //文件列表结构
     NoteListModel*          m_listModel;                    //列表的model
+    myListViewLogic*        m_listViewLogic;                //列表结构的所有逻辑统一
 
     myTreeView*             m_treeView;                     //代指文件夹展示treeView
     myTreeViewModel*        m_treeModel;                    //ui->treeView的数据模型
@@ -108,7 +114,6 @@ private:
 
     QPushButton*            m_newNoteButton;                //代指新建文件按钮
     QPushButton*            m_dotsButton;                   //代指更多选项按钮
-    QPushButton*            m_searchButton;                 //代指搜索按钮
     QPushButton*            m_switchToTextViewButton;       //代指选择文本视图按钮
     QPushButton*            m_switchToKanbanViewButton;     //代指看板视图按钮
     QPushButton*            m_globalSettingsButton;         //代表设置按钮
@@ -126,6 +131,8 @@ private:
     Theme::Value            m_currentTheme;                 //当前主题
     QColor                  m_currentEditorTextColor;       //当前编辑的内容的颜色
     QMenu                   m_mainMenu;                     //菜单
+    QToolButton*            m_searchButton;                 //搜索按钮
+    QToolButton*            m_clearButton;                  //当输入内容后要出来的一个按钮
 
 
 };
