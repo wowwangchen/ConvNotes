@@ -566,7 +566,7 @@ QWidget *myTreeViewDelegate::createEditor
 
         else
         {
-            //qDebug()<<__FUNCTION__<<__LINE__<<"folder";
+            qDebug()<<__FUNCTION__<<__LINE__<<"folder";
             auto widget = new FolderTreeDelegateEditor(m_view, option, index, m_listView, parent);
             widget->setTheme(m_theme);
             connect(this, &myTreeViewDelegate::themeChanged, widget,
