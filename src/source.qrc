@@ -18,5 +18,6 @@
         <file>syles/nodetreeview.css</file>
         <file>image/folder.png</file>
         <file>syles/fontawesome-webfont.ttf</file>
+        <file>syles/toolButton.css</file>
     </qresource>
 </RCC>

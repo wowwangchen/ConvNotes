@@ -8,6 +8,7 @@
 #include<QMouseEvent>
 #include<QObject>
 #include<QSettings>
+#include<QFile>
 #include<QEvent>
 #include<QThread>
 #include<QDir>

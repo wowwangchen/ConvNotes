@@ -1,5 +1,6 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include"fontloader.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -50,42 +51,48 @@ MainWindow::~MainWindow()
 void MainWindow::setupSearchEdit()
 {
 
-//    m_searchEdit->setAttribute(Qt::WA_MacShowFocusRect, 0);
+    m_searchEdit->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
-//    QFont fontAwesomeIcon("Font Awesome 6 Free Solid");
-//#if defined(Q_OS_MACOS)
-//    int pointSizeOffset = 0;
-//#else
-//    int pointSizeOffset = -4;
-//#endif
+    QFont fontAwesomeIcon("Font Awesome 6 Free Solid");
+#if defined(Q_OS_MACOS)
+    int pointSizeOffset = 0;
+#else
+    int pointSizeOffset = -4;
+#endif
 
 
-//    // clear button
-//    m_clearButton = new QToolButton(m_searchEdit);
-//    fontAwesomeIcon.setPointSize(15 + pointSizeOffset);
-//    m_clearButton->setStyleSheet("QToolButton { color: rgb(114, 114, 114) }");
-//    m_clearButton->setFont(fontAwesomeIcon);
-//    m_clearButton->setText(u8"\uf057"); // fa-circle-xmark
-//    m_clearButton->setCursor(Qt::ArrowCursor);
-//    m_clearButton->hide();
+    // clear button
+    m_clearButton = new QToolButton(m_searchEdit);
+    fontAwesomeIcon.setPointSize(15 + pointSizeOffset);
+    m_clearButton->setStyleSheet("QToolButton { color: rgb(114, 114, 114) }");
+    //m_clearButton->setFont(fontAwesomeIcon);
+    m_clearButton->setFont(FontLoader::getInstance().getFont());
+    m_clearButton->setText(u8"\uf057"); // fa-circle-xmark
+    m_clearButton->setCursor(Qt::ArrowCursor);
+    m_clearButton->hide();
 
-//    // search button
-//    m_searchButton = new QToolButton(m_searchEdit);
-//    fontAwesomeIcon.setPointSize(9 + pointSizeOffset);
-//    m_searchButton->setStyleSheet("QToolButton { color: rgb(205, 205, 205) }");
-//    m_searchButton->setFont(fontAwesomeIcon);
-//    m_searchButton->setText(u8"\uf002"); // fa-magnifying-glass
-//    m_searchButton->setCursor(Qt::ArrowCursor);
+    {
+        QIcon temp_icon;
+        temp_icon=QIcon(":/image/search.png");
+        ui->searchButton->setIcon(temp_icon);
+        ui->searchButton->setIconSize(ui->searchButton->size());
 
-//    // layout
-//    QBoxLayout *layout = new QBoxLayout(QBoxLayout::RightToLeft, m_searchEdit);
-//    layout->setContentsMargins(2, 0, 3, 0);
-//    layout->addWidget(m_clearButton);
-//    layout->addStretch();
-//    layout->addWidget(m_searchButton);
-//    m_searchEdit->setLayout(layout);
+        QFile t(":/syles/toolButton.css");
+        if(t.open(QIODevice::ReadOnly))
+            ui->searchButton->setStyleSheet(t.readAll());
+        t.close();
+        m_searchButton=ui->searchButton;
+    }
 
-//    m_searchEdit->installEventFilter(this);
+    //    // layout
+    //    QBoxLayout *layout = new QBoxLayout(QBoxLayout::RightToLeft, m_searchEdit);
+    //    layout->setContentsMargins(2, 0, 3, 0);
+    //    layout->addWidget(m_clearButton);
+    //    layout->addStretch();
+    //    layout->addWidget(m_searchButton);
+    //    m_searchEdit->setLayout(layout);
+
+    m_searchEdit->installEventFilter(this);
 }
 
 void MainWindow::setupMainWindow()
@@ -116,7 +123,7 @@ void MainWindow::setupModelView()
     m_listModel = new NoteListModel(m_listView);
     m_listView->setModel(m_listModel);
     m_listViewLogic = new myListViewLogic(m_listView, m_listModel, m_searchEdit, m_clearButton,
-                                         m_dbManager, this);
+                                          m_dbManager, this);
 
 
     //文件夹树形结构
@@ -136,13 +143,13 @@ void MainWindow::initWindow()
                                 "}");
 
     QString iconColorss=QStringLiteral("min-width: 24px; "
-                                       "min-height: 24px;"
-                                       "max-width:24px; "
-                                       "max-height: 24px;"
-                                       "border-radius: 12px;"
-                                       "border:1px;"
-                                       "background:%1;"
-                                       ).arg("red");
+                                         "min-height: 24px;"
+                                         "max-width:24px; "
+                                         "max-height: 24px;"
+                                         "border-radius: 12px;"
+                                         "border:1px;"
+                                         "background:%1;"
+                                         ).arg("red");
 
 
 
@@ -157,10 +164,6 @@ void MainWindow::initWindow()
     ui->settingButton->setIconSize(ui->settingButton->size());
     ui->settingButton->setStyleSheet(ss);
 
-    temp_icon=QIcon(":/image/search.png");
-    ui->searchButton->setIcon(temp_icon);
-    ui->searchButton->setIconSize(ui->searchButton->size());
-    ui->searchButton->setStyleSheet(ss);
 
     temp_icon=QIcon(":/image/addNote.png");
     ui->addFileButton->setIcon(temp_icon);
@@ -331,19 +334,19 @@ void MainWindow::setDataBase()
     connect(m_dbThread, &QThread::started, this, [=]() {
         setTheme(m_currentTheme);
 
-//        if (needMigrateFromV1_5_0)
-//        {
-//            emit requestMigrateNotesFromV1_5_0(dir.path() + QDir::separator()
-//                                               + QStringLiteral("oldNotes.db"));
-//        }
+        //        if (needMigrateFromV1_5_0)
+        //        {
+        //            emit requestMigrateNotesFromV1_5_0(dir.path() + QDir::separator()
+        //                                               + QStringLiteral("oldNotes.db"));
+        //        }
     });
     connect(this, &MainWindow::requestOpenDBManager, m_dbManager,
             &DBManager::onOpenDBManagerRequested, Qt::QueuedConnection);
     emit requestOpenDBManager(noteDBFilePath, doCreate);
 
 
-//    connect(this, &MainWindow::requestMigrateNotesFromV1_5_0, m_dbManager,
-//            &DBManager::onMigrateNotesFrom1_5_0Requested, Qt::QueuedConnection);
+    //    connect(this, &MainWindow::requestMigrateNotesFromV1_5_0, m_dbManager,
+    //            &DBManager::onMigrateNotesFrom1_5_0Requested, Qt::QueuedConnection);
     connect(m_dbThread, &QThread::finished, m_dbManager, &QObject::deleteLater);
     m_dbThread->start();
 }

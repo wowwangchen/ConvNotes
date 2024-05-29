@@ -67,7 +67,7 @@ myTreeViewDelegate::myTreeViewDelegate(QTreeView *view, QObject *parent, QListVi
 
 void myTreeViewDelegate::setTheme(Theme::Value theme)
 {
-    qDebug()<<"1";
+
     emit themeChanged(theme);
     m_theme = theme;
 
@@ -487,7 +487,7 @@ QWidget *myTreeViewDelegate::createEditor
     auto itemType = static_cast<NodeItem::Type>(index.data(NodeItem::Roles::ItemType).toInt());
 
 
-    //文件夹类型
+    //文件夹分割线
     if (itemType == NodeItem::Type::FolderSeparator)
     {
         //编辑器样式
@@ -506,8 +506,8 @@ QWidget *myTreeViewDelegate::createEditor
         label->setText(displayName);
         layout->addWidget(label);
         auto addButton = new PushButtonType(parent);
-        addButton->setMaximumSize({ 38, 25 });
-        addButton->setMinimumSize({ 38, 25 });
+        addButton->setMaximumSize({ 40, 40 });
+        addButton->setMinimumSize({ 40, 40 });
         addButton->setCursor(QCursor(Qt::PointingHandCursor));
         addButton->setFocusPolicy(Qt::TabFocus);
 

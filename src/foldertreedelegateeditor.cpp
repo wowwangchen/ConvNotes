@@ -43,7 +43,7 @@ FolderTreeDelegateEditor::FolderTreeDelegateEditor(QTreeView *view, const QStyle
     setContentsMargins(0, 0, 0, 0);
     auto layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
+    layout->setSpacing(2);
     setLayout(layout);
     m_expandIcon = new QLabel(this);
     m_expandIcon->setMinimumSize({ 18, 20 });
