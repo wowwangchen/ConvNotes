@@ -9,17 +9,18 @@ MainWindow::MainWindow(QWidget *parent)
     m_treeView(nullptr),
     m_treeModel(new myTreeViewModel(this)),
     m_treeViewLogic(nullptr),
-    m_dbManager(nullptr),
 
     m_newNoteButton(nullptr),
     m_dotsButton(nullptr),
-    m_searchButton(nullptr),
     m_switchToTextViewButton(nullptr),
     m_switchToKanbanViewButton(nullptr),
     m_globalSettingsButton(nullptr),
     m_searchEdit(nullptr),
-    m_textEdit(nullptr),
-    m_editorDateLabel(nullptr)
+    m_editorDateLabel(nullptr),
+    m_dbManager(nullptr),
+    m_searchButton(nullptr),
+    m_noteEditorLogic(nullptr),
+    m_textEdit(nullptr)
 
 
 {
@@ -130,6 +131,10 @@ void MainWindow::setupModelView()
     m_treeView = static_cast<myTreeView*>(ui->allPackageTreeView);
     m_treeView->setModel(m_treeModel);
     m_treeViewLogic = new myTreeViewLogic(m_treeView, m_treeModel, m_dbManager, m_listView, this);
+
+
+    //笔记编辑
+    m_noteEditorLogic = new NoteEditorLogic(m_textEdit, m_editorDateLabel, m_searchEdit,m_dbManager, this);
 
 }
 
@@ -353,8 +358,17 @@ void MainWindow::setDataBase()
 
 void MainWindow::initConnect()
 {
+    connect(m_newNoteButton, &QPushButton::clicked, this, &MainWindow::onNewNoteButtonClicked);
+    connect(m_searchEdit, &QLineEdit::textChanged, m_listViewLogic,
+            &myListViewLogic::onSearchEditTextChanged);
+
     connect(ui->settingButton,&QPushButton::clicked,this,&MainWindow::settingButton_clicked);
     //connect(ui->allPackageTreeView,&myTreeView::renameFolderNameInDatabase,this,[=]{});
+    connect(m_treeView, &myTreeView::loadNotesInFolderRequested, m_listViewLogic,
+            &myListViewLogic::onNotesListInFolderRequested);
+
+    connect(this, &MainWindow::requestNodesTree, m_dbManager, &DBManager::onNodeTagTreeRequested,
+            Qt::BlockingQueuedConnection);
 }
 
 void MainWindow::setColorDialogSS(QColorDialog *dialog)
@@ -368,6 +382,75 @@ void MainWindow::setColorDialogSS(QColorDialog *dialog)
 void MainWindow::initializeSettingsDatabase()
 {
 
+}
+
+void MainWindow::createNewNote()
+{
+    m_listView->scrollToTop();
+    QModelIndex newNoteIndex;
+
+    if (!m_noteEditorLogic->isTempNote())  //!m_noteEditorLogic->isTempNote()
+    {
+        // clear the textEdit
+        m_noteEditorLogic->closeEditor();
+
+        NodeData tmpNote;
+        tmpNote.setNodeType(NodeData::Note);
+        QDateTime noteDate = QDateTime::currentDateTime();
+        tmpNote.setCreationDateTime(noteDate);
+        tmpNote.setLastModificationDateTime(noteDate);
+        tmpNote.setFullTitle(QStringLiteral("New Note"));
+
+        auto inf = m_listViewLogic->listViewInfo();
+        if (inf.parentFolderId > SpecialNodeID::RootFolder)
+        {
+            //获取父节点
+            NodeData parent;
+            QMetaObject::invokeMethod(m_dbManager, "getNode", Qt::BlockingQueuedConnection,
+                                      Q_RETURN_ARG(NodeData, parent),
+                                      Q_ARG(int, inf.parentFolderId));
+
+            if (parent.nodeType() == NodeData::Folder)
+            {
+                tmpNote.setParentId(parent.id());
+                tmpNote.setParentName(parent.fullTitle());
+            }
+            else
+            {
+                tmpNote.setParentId(SpecialNodeID::DefaultNotesFolder);
+                tmpNote.setParentName("Notes");
+            }
+
+        }
+        else
+        {
+            tmpNote.setParentId(SpecialNodeID::DefaultNotesFolder);
+            tmpNote.setParentName("Notes");
+        }
+        //设置id
+        int noteId = SpecialNodeID::InvalidNodeId;
+        QMetaObject::invokeMethod(m_dbManager, "nextAvailableNodeId", Qt::BlockingQueuedConnection,
+                                  Q_RETURN_ARG(int, noteId));
+        tmpNote.setId(noteId);
+        tmpNote.setIsTempNote(true);
+
+        // insert the new note to NoteListModel
+        newNoteIndex = m_listModel->insertNote(tmpNote, 0); //model中添加
+        // update the editor
+        m_noteEditorLogic->showNotesInEditor({ tmpNote });
+    }
+    //是临时笔记
+    else
+    {
+        qDebug()<<"is temp note";
+        newNoteIndex = m_listModel->getNoteIndex(m_noteEditorLogic->currentEditingNoteId());
+        m_listView->animateAddedRow({ newNoteIndex });
+    }
+
+
+    // update the current selected index
+    m_listView->setCurrentIndexC(newNoteIndex);
+    m_textEdit->setFocus();
 }
 
 
@@ -434,5 +517,28 @@ void MainWindow::on_searchButton_clicked()
     m_currentTheme = Theme::Dark;
     ui->backFrame->setStyleSheet("background-color: rgb(25, 25, 25);");
     m_treeViewLogic->setTheme(m_currentTheme);
+}
+
+
+void MainWindow::onNewNoteButtonClicked()
+{
+    if (!m_newNoteButton->isVisible()) {
+        return;
+    }
+    if (m_listViewLogic->isAnimationRunning()) {
+        return;
+    }
+
+    // save the data of the previous selected
+   // m_noteEditorLogic->saveNoteToDB();
+
+    if (!m_searchEdit->text().isEmpty())
+    {
+        m_listViewLogic->clearSearch(true);
+    }
+    else
+    {
+        createNewNote();
+    }
 }
 

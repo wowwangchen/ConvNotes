@@ -59,6 +59,12 @@ QModelIndex NoteListModel::insertNote(const NodeData &note, int row)
 
         beginInsertRows(QModelIndex(), row, row);
         m_pinnedList.insert(row, note);
+
+        for(auto& iter:m_pinnedList)
+        {
+            qDebug()<<iter.id();
+        }
+
         endInsertRows();
 
         emit rowsInsertedC({ createIndex(row, 0) });
@@ -79,6 +85,11 @@ QModelIndex NoteListModel::insertNote(const NodeData &note, int row)
         }
         beginInsertRows(QModelIndex(), row, row);
         m_noteList.insert(row - m_pinnedList.size(), note);
+
+        for(auto& iter:m_noteList)
+        {
+            qDebug()<<iter.id();
+        }
         endInsertRows();
         emit rowsInsertedC({ createIndex(row, 0) });
         emit rowCountChanged();

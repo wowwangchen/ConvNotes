@@ -20,13 +20,20 @@ myListView::myListView(QWidget *parent) :
     setAttribute(Qt::WA_MacShowFocusRect, false);  //macos需要
 
     setupStyleSheet();
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     QTimer::singleShot(0, this, SLOT(init()));
 
     //菜单
+    contextMenu = new QMenu(this);
     setContextMenuPolicy(Qt::CustomContextMenu); //右键发送打开菜单信号
     connect(this, &QWidget::customContextMenuRequested, this, &myListView::onCustomContextMenu);
-    contextMenu = new QMenu(this);
+    contextMenu->setStyleSheet("background-color:rgb(240,240,240);");
+    //QFile t(":/syles/menu.css");
+    //if(t.open(QIODevice::ReadOnly))
+    //    contextMenu->setStyleSheet(t.readAll());
+    //t.close();
 
     //菜单上的按钮
     deleteNoteAction = new QAction(tr("Delete Note"), this);
@@ -67,8 +74,8 @@ myListView::~myListView()
 void myListView::setupStyleSheet()
 {
     QFile file(":/syles/notelistview.css");
-    file.open(QFile::ReadOnly);
-    setStyleSheet(file.readAll());
+    if(file.open(QFile::ReadOnly))
+        this->setStyleSheet(file.readAll());
 }
 
 void myListView::closeAllEditor()
@@ -282,8 +289,7 @@ void myListView::onCustomContextMenu(QPoint point)
 
 
         //不在tag中也不再垃圾桶中
-        if ((!m_listViewInfo.isInTag)
-            && (m_listViewInfo.parentFolderId != SpecialNodeID::TrashFolder))
+        if (m_listViewInfo.parentFolderId != SpecialNodeID::TrashFolder)
         {
 
             contextMenu->addSeparator();

@@ -17,8 +17,9 @@ NodePath DBManager::getNodeAbsolutePath(int nodeId)
         qDebug() << __FUNCTION__ << __LINE__ << query.lastError() << query.isValid();
     }
 
-    query.last();  //只返回一条记录的查询，等价于next
-    auto absolutePath = query.value(0).toString();
+    QString absolutePath;
+    while(query.next())  //只返回一条记录的查询，等价于next
+        absolutePath = query.value(0).toString();
 
     return absolutePath;
 }
@@ -461,6 +462,7 @@ int DBManager::nextAvailableNodeId()
         qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
     }
     query.last();   //最新的一个节点
+    qDebug()<<__FUNCTION__<<__LINE__;
     int nodeId = query.value(0).toInt();
     return nodeId;
 }
@@ -615,8 +617,10 @@ void DBManager::onNotesListInFolderRequested(int parentID, bool isRecursive, boo
         query.bindValue(QStringLiteral(":node_type"), static_cast<int>(NodeData::Note));
 
         bool status = query.exec();
-        if (status) {
-            while (query.next()) {
+        if (status)
+        {
+            while (query.next())
+            {
                 NodeData node;
                 node.setId(query.value(0).toInt());
                 node.setFullTitle(query.value(1).toString());

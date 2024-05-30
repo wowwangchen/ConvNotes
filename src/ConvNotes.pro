@@ -12,6 +12,7 @@ SOURCES += \
     allnotebuttontreedelegateeditor.cpp \
     customapplicationstyle.cpp \
     customdocument.cpp \
+    custommarkdownhighlighter.cpp \
     dbmanager.cpp \
     defaultnotefolderdelegateeditor.cpp \
     foldertreedelegateeditor.cpp \
@@ -40,6 +41,7 @@ HEADERS += \
     codetranslate.h \
     customapplicationstyle.h \
     customdocument.h \
+    custommarkdownhighlighter.h \
     dbmanager.h \
     defaultnotefolderdelegateeditor.h \
     foldertreedelegateeditor.h \

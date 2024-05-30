@@ -32,14 +32,88 @@ public:
     explicit NoteListDelegateEditor(const NoteListDelegate *delegate, myListView *view,
                                     const QStyleOptionViewItem &option, const QModelIndex &index,
                                     QWidget *parent = nullptr);
-public slots:
-
-    void setTheme(Theme::Value theme);
+        ~NoteListDelegateEditor();
+    void setRowRightOffset(int rowRightOffset);
+    void setActive(bool isActive);
     void recalculateSize();
+    void setScrollBarPos(int pos);
+    int getScrollBarPos();
+    bool underMouseC() const;
+    QPixmap renderToPixmap();
+
+
+
+
+
+public slots:
+    void setTheme(Theme::Value theme);
+
+
 
 signals:
     void updateSizeHint(int id, const QSize &sz, const QModelIndex &index);
     void nearDestroyed(int id, const QModelIndex &index);
+
+
+
+
+
+private:
+    void paintBackground(QPainter *painter, const QStyleOptionViewItem &option,
+                         const QModelIndex &index) const;
+    void paintLabels(QPainter *painter, const QStyleOptionViewItem &option,
+                     const QModelIndex &index) const;
+    void paintSeparator(QPainter *painter, const QStyleOptionViewItem &option,
+                        const QModelIndex &index) const;
+    QString parseDateTime(const QDateTime &dateTime) const;
+
+
+
+protected:
+    virtual void paintEvent(QPaintEvent *event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void dragEnterEvent(QDragEnterEvent *event) override;
+    virtual void dragLeaveEvent(QDragLeaveEvent *event) override;
+
+    virtual void enterEvent(QEvent *event) override;
+
+
+    virtual void leaveEvent(QEvent *event) override;
+    virtual void dropEvent(QDropEvent *event) override;
+
+
+
+
+
+private:
+    const NoteListDelegate *m_delegate;
+    QStyleOptionViewItem m_option;
+    int m_id;
+    myListView *m_view;
+
+
+    QString m_displayFont;
+    QFont m_titleFont;
+    QFont m_titleSelectedFont;
+    QFont m_dateFont;
+    QFont m_headerFont;
+    QColor m_titleColor;
+    QColor m_dateColor;
+    QColor m_contentColor;
+    QColor m_ActiveColor;
+    QColor m_notActiveColor;
+    QColor m_hoverColor;
+    QColor m_applicationInactiveColor;
+    QColor m_separatorColor;
+    QColor m_defaultColor;
+    int m_rowHeight;
+    int m_rowRightOffset;
+    bool m_isActive;
+    QImage m_folderIcon;
+    Theme::Value m_theme;
+    bool m_containsMouse;
+    QModelIndex m_animatedIndex;
+
 };
 
 #endif // NOTELISTDELEGATEEDITOR_H

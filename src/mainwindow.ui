@@ -406,8 +406,7 @@ border:none;
                 </size>
                </property>
                <property name="styleSheet">
-                <string notr="true">
-</string>
+                <string notr="true"/>
                </property>
                <property name="text">
                 <string/>
@@ -433,10 +432,28 @@ border:none;
             </layout>
            </item>
            <item>
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>5</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
             <widget class="myListView" name="filesListView">
              <property name="styleSheet">
               <string notr="true">background-color: transparent;
-border:none;</string>
+border:none;
+
+</string>
              </property>
             </widget>
            </item>

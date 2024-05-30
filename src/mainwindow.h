@@ -21,7 +21,9 @@
 #include "codetranslate.h"
 #include"notelistmodel.h"
 #include"mylistviewlogic.h"
-
+#include"noteeditorlogic.h"
+#include"customdocument.h"
+#include"custommarkdownhighlighter.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -80,8 +82,9 @@ private:
     void    setDataBase();                          //初始化数据库
     void    initConnect();                          //初始化信号与槽
     void    setupModelView();                       //初始化模型视图
-    void    setColorDialogSS(QColorDialog *dialog);
+    void    setColorDialogSS(QColorDialog *dialog); //设置stylesheet
     void    initializeSettingsDatabase();           //初始化程序设置数据库
+    void    createNewNote();                        //新建笔记
 
 
 public slots:
@@ -100,6 +103,8 @@ protected:
 
 private slots:
     void on_searchButton_clicked();
+    void onNewNoteButtonClicked();
+
 
 private:
     Ui::MainWindow *ui;
@@ -118,8 +123,7 @@ private:
     QPushButton*            m_switchToTextViewButton;       //代指选择文本视图按钮
     QPushButton*            m_switchToKanbanViewButton;     //代指看板视图按钮
     QPushButton*            m_globalSettingsButton;         //代表设置按钮
-    QLineEdit*              m_searchEdit;                   //代表搜索编辑行
-    CustomDocument*         m_textEdit;                     //代表文本编辑框
+    QLineEdit*              m_searchEdit;                   //代表搜索编辑行                   
     QLabel*                 m_editorDateLabel;              //代表日期编辑标签
 
     QSettings*              m_settingsDatabase;             //应用程序配置的数据库
@@ -134,6 +138,9 @@ private:
     QMenu                   m_mainMenu;                     //菜单
     QToolButton*            m_searchButton;                 //搜索按钮
     QToolButton*            m_clearButton;                  //当输入内容后要出来的一个按钮
+
+    NoteEditorLogic*        m_noteEditorLogic;              //笔记编写的操控类
+    CustomDocument*         m_textEdit;                     //代表文本编辑框
 
 
 };
