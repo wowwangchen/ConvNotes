@@ -1212,7 +1212,7 @@ QSize NoteListDelegate::sizeHint(const QStyleOptionViewItem &option, const QMode
         {
             if (model && model->isFirstPinnedNote(index))
             {
-                result.setHeight(25);
+                result.setHeight(5);
                 return result;
             }
             else
@@ -1275,6 +1275,7 @@ QSize NoteListDelegate::sizeHint(const QStyleOptionViewItem &option, const QMode
         result.setHeight(result.height() - 10 + NoteListConstant::lastElSepSpace + yOffsets);
     }
 
+    result.setHeight(result.height()+30);
 
     return result;
 }
@@ -1341,7 +1342,7 @@ QSize NoteListDelegate::bufferSizeHint(const QStyleOptionViewItem &option, const
 
     if (m_isInAllNotes)
     {
-        result.setHeight(result.height() + 20);
+        result.setHeight(result.height() + 0);
     }
 
     auto model = dynamic_cast<NoteListModel *>(m_view->model());
@@ -1360,7 +1361,7 @@ QSize NoteListDelegate::bufferSizeHint(const QStyleOptionViewItem &option, const
         {
             if (model && model->isFirstPinnedNote(index))
             {
-                result.setHeight(25);
+                result.setHeight(15);
                 return result;
             }
             else
@@ -1406,5 +1407,6 @@ QSize NoteListDelegate::bufferSizeHint(const QStyleOptionViewItem &option, const
         result.setHeight(result.height() - 10 + NoteListConstant::lastElSepSpace + yOffsets);
     }
 
+    result.setHeight(result.height()+50);
     return result;
 }

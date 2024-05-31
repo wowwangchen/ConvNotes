@@ -14,6 +14,7 @@
 #include<QDir>
 #include<QFileInfo>
 #include<QDebug>
+#include<QMetaType>
 #include"mytreeview.h"
 #include"mytreeviewlogic.h"
 #include"mytreeviewmodel.h"
@@ -30,6 +31,7 @@ namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 
+//qRegisterMetaType< QVector<NodeData> >("QVector<NodeData>");
 //整个项目的主界面
 //分为treeView，listView，textEdit
 class MainWindow : public QMainWindow

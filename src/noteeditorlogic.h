@@ -1,3 +1,4 @@
+
 #ifndef NOTEEDITORLOGIC_H
 #define NOTEEDITORLOGIC_H
 
@@ -10,6 +11,8 @@
 #include"dbmanager.h"
 #include"customdocument.h"
 #include"custommarkdownhighlighter.h"
+
+
 
 
 //笔记编写的操控类

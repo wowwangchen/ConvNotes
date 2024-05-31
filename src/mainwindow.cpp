@@ -358,17 +358,51 @@ void MainWindow::setDataBase()
 
 void MainWindow::initConnect()
 {
+    //新建笔记
     connect(m_newNoteButton, &QPushButton::clicked, this, &MainWindow::onNewNoteButtonClicked);
     connect(m_searchEdit, &QLineEdit::textChanged, m_listViewLogic,
             &myListViewLogic::onSearchEditTextChanged);
-
+    //设置按钮
     connect(ui->settingButton,&QPushButton::clicked,this,&MainWindow::settingButton_clicked);
     //connect(ui->allPackageTreeView,&myTreeView::renameFolderNameInDatabase,this,[=]{});
+    //数据库加载文件夹树
+    connect(this, &MainWindow::requestNodesTree, m_dbManager, &DBManager::onNodeTagTreeRequested,
+            Qt::BlockingQueuedConnection);
+    //搜索的内容改变
+    connect(m_searchEdit, &QLineEdit::textChanged, m_listViewLogic,
+            &myListViewLogic::onSearchEditTextChanged);
+    //刷新列表
+    connect(qApp, &QApplication::applicationStateChanged, this,
+            [this]() { m_listView->update(m_listView->currentIndex()); });
+    //显示笔记内容
+    connect(m_listViewLogic, &myListViewLogic::showNotesInEditor, m_noteEditorLogic,
+            &NoteEditorLogic::showNotesInEditor);
+    //列表改变所属文件夹改变，更新名字
+    connect(m_listViewLogic, &myListViewLogic::listViewLabelChanged, this,
+            [this](const QString &l1, const QString &l2) {
+                ui->packageNameLabel->setText(l1);
+            });
+    //请求新建笔记
+    connect(m_listViewLogic, &myListViewLogic::requestNewNote, this,
+            &MainWindow::onNewNoteButtonClicked);
+    //移动节点
+    connect(m_listViewLogic, &myListViewLogic::moveNoteRequested, this, [this](int id, int target) {
+        m_treeViewLogic->onMoveNodeRequested(id, target);
+        m_treeViewLogic->openFolder(target);
+    });
+    //笔记移动
+    connect(m_treeViewLogic, &myTreeViewLogic::noteMoved, m_listViewLogic,
+            &myListViewLogic::onNoteMovedOut);
+    //保存上次选择的笔记
+    connect(m_treeView, &myTreeView::saveLastSelectedNote, m_listViewLogic,
+            &myListViewLogic::setLastSelectedNote);
+    //加载上次选择的笔记
+    connect(m_treeView, &myTreeView::requestLoadLastSelectedNote, m_listViewLogic,
+            &myListViewLogic::loadLastSelectedNoteRequested);
+    //从文件夹中加载笔记
     connect(m_treeView, &myTreeView::loadNotesInFolderRequested, m_listViewLogic,
             &myListViewLogic::onNotesListInFolderRequested);
 
-    connect(this, &MainWindow::requestNodesTree, m_dbManager, &DBManager::onNodeTagTreeRequested,
-            Qt::BlockingQueuedConnection);
 }
 
 void MainWindow::setColorDialogSS(QColorDialog *dialog)

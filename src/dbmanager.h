@@ -11,11 +11,15 @@
 #include<QMetaType>
 #include<QSqlDatabase>
 #include<QSqlError>
+
 #include"nodedata.h"
 #include"nodepath.h"
 
 #define DEFAULT_DATABASE_NAME "default_database"
 #define OUTSIDE_DATABASE_NAME "outside_database"
+
+//qRegisterMetaType<NodeData>("NodeData");
+//qRegisterMetaType<QVector<NodeData>>("QVector<NodeData>");
 
 struct NodeTagTreeData
 {
@@ -23,6 +27,9 @@ struct NodeTagTreeData
     //QVector<TagData> tagTreeData;
 };
 Q_DECLARE_METATYPE(NodeTagTreeData)
+Q_DECLARE_METATYPE(QVector<NodeData>)
+//Q_DECLARE_METATYPE(NodeData)
+
 struct ListViewInfo
 {
     bool        isInSearch;

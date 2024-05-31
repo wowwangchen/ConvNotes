@@ -462,7 +462,6 @@ int DBManager::nextAvailableNodeId()
         qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
     }
     query.last();   //最新的一个节点
-    qDebug()<<__FUNCTION__<<__LINE__;
     int nodeId = query.value(0).toInt();
     return nodeId;
 }
@@ -649,10 +648,9 @@ void DBManager::onNotesListInFolderRequested(int parentID, bool isRecursive, boo
         }
     }
 
-
     ListViewInfo inf;
     inf.isInSearch = false;
-    inf.isInTag = false;
+    inf.isInTag = true;
     inf.parentFolderId = parentID;
     inf.currentNotesId = { SpecialNodeID::InvalidNodeId };
     inf.needCreateNewNote = newNote;
@@ -662,6 +660,7 @@ void DBManager::onNotesListInFolderRequested(int parentID, bool isRecursive, boo
         return a.lastModificationdateTime() > b.lastModificationdateTime();
     });
 
+    //qDebug()<<__FUNCTION__<<__LINE__<<"notelist_size:"<<nodeList.size();
     emit notesListReceived(nodeList, inf);
 }
 

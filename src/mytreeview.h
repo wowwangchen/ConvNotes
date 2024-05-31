@@ -92,6 +92,8 @@ signals:
     void renameFolderRequested();
     //请求移动节点位置
     void moveNodeRequested(int node, int target);
+    //保存上次选择的节点
+      void saveLastSelectedNote();
 
 public slots:
     //自定义菜单

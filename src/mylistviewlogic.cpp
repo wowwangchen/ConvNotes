@@ -38,8 +38,8 @@ myListViewLogic::myListViewLogic(myListView *noteView, NoteListModel *noteModel,
     m_listView->setDbManager(m_dbManager);
 
 
-    //加载笔记列表
-    connect(m_dbManager, &DBManager::notesListReceived, this, &myListViewLogic::loadNoteListModel);
+    //加载笔记列表  //&myListViewLogic::loadNoteListModel
+    connect(m_dbManager, &DBManager::notesListReceived, this,&myListViewLogic::loadNoteListModel);
     //移动某些行
     connect(m_listModel, &NoteListModel::rowsAboutToBeMovedC, m_listView,
             &myListView::rowsAboutToBeMoved);
@@ -348,7 +348,8 @@ void myListViewLogic::onNotePressed(const QModelIndexList &indexes)
 
 void myListViewLogic::deleteNoteRequestedI(const QModelIndexList &indexes)
 {
-    if (!indexes.empty())
+
+    if (!indexes.isEmpty())
     {
         bool isInTrash = false;
         QVector<NodeData> needDelete;   //节点
@@ -840,7 +841,7 @@ void myListViewLogic::loadLastSelectedNoteRequested()
 
 void myListViewLogic::onNotesListInFolderRequested(int parentID, bool isRecursive, bool newNote, int scrollToId)
 {
-      //当前列表不在搜索状态并且搜索栏不为空
+      //当前列表在搜索状态并且搜索栏不为空
       if (m_listViewInfo.isInSearch && !m_searchEdit->text().isEmpty())
       {
         //设置当前列表的信息，并且展示清除按钮，然后在数据库中查询

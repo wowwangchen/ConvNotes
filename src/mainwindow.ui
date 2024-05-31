@@ -248,7 +248,7 @@ border:none;
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>30</width>
+                 <width>20</width>
                  <height>20</height>
                 </size>
                </property>
@@ -258,7 +258,7 @@ border:none;
               <widget class="QLabel" name="packageNameLabel">
                <property name="minimumSize">
                 <size>
-                 <width>120</width>
+                 <width>130</width>
                  <height>40</height>
                 </size>
                </property>
@@ -283,7 +283,7 @@ border:none;
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>135</width>
+                 <width>110</width>
                  <height>20</height>
                 </size>
                </property>

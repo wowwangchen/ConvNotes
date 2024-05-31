@@ -11,6 +11,8 @@
 #include"notelistdelegate.h"
 #include"mylistview.h"
 
+
+
 //联合文件列表的MVD与数据库
 class myListViewLogic : public QObject
 {
