@@ -40,7 +40,7 @@ NoteListDelegateEditor::NoteListDelegateEditor(const NoteListDelegate *delegate,
     m_hoverColor(207, 207, 207),
     m_applicationInactiveColor(207, 207, 207),
     m_separatorColor(191, 191, 191),
-    m_defaultColor(247, 247, 247),
+    m_defaultColor(240, 240, 240),
     m_rowHeight(106),
     m_rowRightOffset(0),
     m_isActive(false),
@@ -129,7 +129,7 @@ void NoteListDelegateEditor::setTheme(Theme::Value theme)
     case Theme::Light: {
         m_titleColor = QColor(26, 26, 26);
         m_dateColor = QColor(26, 26, 26);
-        m_defaultColor = QColor(247, 247, 247);
+        m_defaultColor = QColor(240, 240, 240);
         m_ActiveColor = QColor(218, 233, 239);
         m_notActiveColor = QColor(175, 212, 228);
         m_hoverColor = QColor(207, 207, 207);
@@ -632,8 +632,9 @@ void NoteListDelegateEditor::recalculateSize()
             result.setHeight(result.height() - 10 + NoteListConstant::lastElSepSpace + yOffsets);
         }
 
+
         result.setHeight(result.height());
-        result.setHeight(result.height()+40);
+        result.setHeight(result.height()+43);
 
 
         //有置顶且置顶折叠且当前笔记置顶

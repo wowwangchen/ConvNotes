@@ -6,6 +6,7 @@
 #include"notelistdelegate.h"
 #include"mylistview.h"
 
+
 //列表的不同内容的间隔
 struct NoteListConstant
 {
@@ -27,6 +28,7 @@ struct NoteListConstant
 };
 
 
+//笔记列表界面的项的代理编辑器
 class NoteListDelegateEditor : public QWidget
 {
     Q_OBJECT

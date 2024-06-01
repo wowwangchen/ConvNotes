@@ -452,7 +452,7 @@ void myTreeView::dragEnterEvent(QDragEnterEvent *event)
 void myTreeView::dropEvent(QDropEvent *event)
 {
 
-
+    qDebug()<<__FUNCTION__<<__LINE__;
 
     //判断拖入事件是否包含特定格式，也就是看拖动的是不是节点
     if (event->mimeData()->hasFormat(NOTE_MIME))
@@ -480,12 +480,14 @@ void myTreeView::dropEvent(QDropEvent *event)
                     //文件夹类型，移动文件(夹)位置
                     if (itemType == NodeItem::Type::FolderItem)
                     {
+                        qDebug()<<__FUNCTION__<<__LINE__;
                         emit requestMoveNode(nodeId,dropIndex.data(NodeItem::NodeId).toInt());//源、目标
                         event->acceptProposedAction();
                     }
                     //垃圾桶类型，放入垃圾桶文件夹
                     else if (itemType == NodeItem::Type::TrashButton)
                     {
+                         qDebug()<<__FUNCTION__<<__LINE__;
                         emit requestMoveNode(nodeId,SpecialNodeID::TrashFolder);
                         event->acceptProposedAction();
                     }

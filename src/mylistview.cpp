@@ -30,10 +30,7 @@ myListView::myListView(QWidget *parent) :
     setContextMenuPolicy(Qt::CustomContextMenu); //右键发送打开菜单信号
     connect(this, &QWidget::customContextMenuRequested, this, &myListView::onCustomContextMenu);
     contextMenu->setStyleSheet("background-color:rgb(240,240,240);");
-    //QFile t(":/syles/menu.css");
-    //if(t.open(QIODevice::ReadOnly))
-    //    contextMenu->setStyleSheet(t.readAll());
-    //t.close();
+
 
     //菜单上的按钮
     deleteNoteAction = new QAction(tr("Delete Note"), this);
@@ -61,7 +58,7 @@ myListView::myListView(QWidget *parent) :
         emit newNoteRequested(); });
 
     //相关需要的操作的设置
-    m_dragPixmap.load("qrc:/images/notepad.icns");  //macos需要
+    m_dragPixmap.load(":/image/notepad.ico");
 
 
 }
@@ -407,6 +404,7 @@ void myListView::onCustomContextMenu(QPoint point)
                     {
                         if (selectedIndex.isValid())
                         {
+                            qDebug()<<__FUNCTION__<<__LINE__;
                             emit moveNoteRequested(
                                 selectedIndex.data(NoteListModel::NoteID).toInt(), id);
                         }
@@ -471,7 +469,10 @@ void myListView::onAnimationFinished(NoteListState state)
             for (const auto id : qAsConst(m_needRemovedNotes))
             {
                 auto index = model->getNoteIndex(id);
-                model->removeRow(index.row());
+                if(index.isValid())
+                    model->removeRow(index.row());
+                else
+                    qDebug()<<__FUNCTION__<<__LINE__<<"index is not valid";
             }
 
             m_needRemovedNotes.clear();
@@ -922,6 +923,7 @@ void myListView::startDrag(Qt::DropActions supportedActions)
             {
                 qDebug() << __FUNCTION__ << "Dragging row" << current.row()
                          << "is in opened editor list but editor widget is null";
+                return;
             }
         }
         else
@@ -930,7 +932,7 @@ void myListView::startDrag(Qt::DropActions supportedActions)
         }
 
 
-        //数据模型中又置顶，且第一个置顶与不指定的笔记都是当前节点
+        //数据模型中又置顶，且第一个置顶与不置顶的笔记都是当前节点
         auto model = dynamic_cast<NoteListModel *>(this->model());
         if (model && model->hasPinnedNote()
             && (model->isFirstPinnedNote(current) || model->isFirstUnpinnedNote(current)))

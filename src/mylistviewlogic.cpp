@@ -673,7 +673,10 @@ void myListViewLogic::onNoteEditClosed(const NodeData &note, bool selectNext)
 void myListViewLogic::deleteNoteRequested(const NodeData &note)
 {
     auto index = m_listModel->getNoteIndex(note.id());
-    deleteNoteRequestedI({ index });
+    if(index.isValid())
+        deleteNoteRequestedI({ index });
+    else
+        qDebug()<<__FUNCTION__<<__LINE__;
 }
 
 void myListViewLogic::selectNoteUp()
@@ -716,7 +719,6 @@ void myListViewLogic::selectNoteDown()
 
     if (currentIndex.isValid())
     {
-
         int currentRow = currentIndex.row();
         QModelIndex belowIndex = m_listView->model()->index(currentRow + 1, 0);
         if (belowIndex.isValid())
@@ -734,7 +736,9 @@ void myListViewLogic::selectNoteDown()
         {
             m_listView->setFocus();
         }
-    } else {
+    }
+    else
+    {
         selectFirstNote();
     }
 }

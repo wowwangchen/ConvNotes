@@ -61,6 +61,7 @@ void myTreeViewLogic::openFolder(int id)
 
 void myTreeViewLogic::onMoveNodeRequested(int nodeId, int targetId)
 {
+    qDebug()<<__FUNCTION__<<__LINE__;
     NodeData target;
 
     //获取targetID对应的节点数据

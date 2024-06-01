@@ -15,7 +15,7 @@
 
 
 
-//笔记编写的操控类
+//笔记具体内容编写的控制类
 class NoteEditorLogic : public QObject
 {
     Q_OBJECT

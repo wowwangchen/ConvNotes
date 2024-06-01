@@ -184,6 +184,7 @@ void DBManager::open(const QString &path, bool doCreate)
 void DBManager::createTables()
 {
     qDebug()<<__FUNCTION__<<__LINE__;
+
     //开始事务，原子操作
     m_db.transaction();
     QSqlQuery query(m_db);
@@ -1262,7 +1263,42 @@ void DBManager::increaseChildNotesCountFolder(int folderId)
 
 void DBManager::decreaseChildNotesCountFolder(int folderId)
 {
+    QSqlQuery query(m_db);
+    query.prepare(R"(SELECT child_notes_count, absolute_path  FROM "node_table" WHERE id=:id)");
+    query.bindValue(QStringLiteral(":id"), folderId);
+    bool status = query.exec();
+    int childNotesCount = 0;
+    QString absPath;
+    if (status)
+    {
+        query.next();
+        childNotesCount = query.value(0).toInt();
+        absPath = query.value(1).toString();
+    }
+    else
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+        return;
+    }
+    query.clear();
 
+
+    childNotesCount -= 1;
+    if (childNotesCount < 0)
+    {
+        childNotesCount = 0;
+    }
+
+    query.prepare(QStringLiteral("UPDATE node_table SET child_notes_count = :child_notes_count "
+                                 "WHERE id = :id"));
+    query.bindValue(QStringLiteral(":id"), folderId);
+    query.bindValue(QStringLiteral(":child_notes_count"), childNotesCount);
+    status = query.exec();
+    if (!status)
+    {
+        qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
+    }
+    emit childNotesCountUpdatedFolder(folderId, absPath, childNotesCount);
 }
 
 bool DBManager::isNodeExist(const NodeData &node)
@@ -1981,7 +2017,6 @@ void DBManager::removeNote(const NodeData &note)
             qDebug() << __FUNCTION__ << __LINE__ << query.lastError();
         }
         query.clear();
-
 
         query.prepare(R"(DELETE FROM "tag_relationship" )"
                       R"(WHERE node_id = (:id);)");

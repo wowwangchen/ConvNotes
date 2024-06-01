@@ -33,12 +33,12 @@ MainWindow::MainWindow(QWidget *parent)
     setDataBase();
     setupModelView();
     initWindow();
-    initConnect();
     setupSearchEdit();
 
-    connect(this, &MainWindow::requestNodesTree, m_dbManager, &DBManager::onNodeTagTreeRequested,
-            Qt::BlockingQueuedConnection);
-    emit requestNodesTree();
+
+        initConnect();
+
+            emit requestNodesTree();
 }
 
 MainWindow::~MainWindow()
@@ -192,9 +192,6 @@ void MainWindow::initWindow()
 
 
 
-    QDateTime currentDateTime = QDateTime::currentDateTime();
-    QString formattedDateTime = currentDateTime.toString("yyyy, MM d, h:mm AP");//MM d, yyyy, h:mm AP
-    ui->lastChangeDateLabel->setText(formattedDateTime);
 
     ui->searchLineText->setPlaceholderText("Search");
 
@@ -358,6 +355,12 @@ void MainWindow::setDataBase()
 
 void MainWindow::initConnect()
 {
+    //关闭某个笔记的编辑
+    connect(m_listViewLogic, &myListViewLogic::closeNoteEditor, m_noteEditorLogic,
+            &NoteEditorLogic::closeEditor);
+    //初始化界面打开文件夹树
+    connect(this, &MainWindow::requestNodesTree, m_dbManager, &DBManager::onNodeTagTreeRequested,
+            Qt::BlockingQueuedConnection);
     //新建笔记
     connect(m_newNoteButton, &QPushButton::clicked, this, &MainWindow::onNewNoteButtonClicked);
     connect(m_searchEdit, &QLineEdit::textChanged, m_listViewLogic,
@@ -387,6 +390,7 @@ void MainWindow::initConnect()
             &MainWindow::onNewNoteButtonClicked);
     //移动节点
     connect(m_listViewLogic, &myListViewLogic::moveNoteRequested, this, [this](int id, int target) {
+        qDebug()<<__FUNCTION__<<__LINE__;
         m_treeViewLogic->onMoveNodeRequested(id, target);
         m_treeViewLogic->openFolder(target);
     });

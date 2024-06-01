@@ -73,10 +73,8 @@ void myTreeViewDelegate::setTheme(Theme::Value theme)
 
     switch (theme)
     {
-qDebug()<<"2";
     case Theme::Light:
     {
-qDebug()<<"3";
         m_titleColor = QColor(26, 26, 26);
         m_dateColor = QColor(26, 26, 26);
         m_defaultColor = QColor(247, 247, 247);
