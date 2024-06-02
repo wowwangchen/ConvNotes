@@ -53,6 +53,8 @@ public:
     //设置笔记数据
     void setNoteData(const QModelIndex &index, const NodeData &note);
 
+    bool noteIsHaveTag(const QModelIndex &index) const;
+
 
     //获取索引对应的笔记的信息
     const NodeData &getNote(const QModelIndex &index) const;

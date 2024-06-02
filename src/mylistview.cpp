@@ -141,9 +141,13 @@ void myListView::openPersistentEditorC(const QModelIndex &index)
 {
     if (index.isValid())
     {
-        auto id = index.data(NoteListModel::NoteID).toInt();
-        m_openedEditor[id] = {};        //列表中添加
-        openPersistentEditor(index);    //真正打开持久化编辑器
+        auto isHaveTag = dynamic_cast<NoteListModel *>(model())->noteIsHaveTag(index);
+        if (isHaveTag)
+        {
+            auto id = index.data(NoteListModel::NoteID).toInt();
+            m_openedEditor[id] = {};        //列表中添加
+            openPersistentEditor(index);    //真正打开持久化编辑器
+        }
     }
 }
 
@@ -404,7 +408,6 @@ void myListView::onCustomContextMenu(QPoint point)
                     {
                         if (selectedIndex.isValid())
                         {
-                            qDebug()<<__FUNCTION__<<__LINE__;
                             emit moveNoteRequested(
                                 selectedIndex.data(NoteListModel::NoteID).toInt(), id);
                         }
@@ -438,6 +441,7 @@ void myListView::onRemoveRowRequested(const QModelIndexList &indexes)
         {
             m_needRemovedNotes.push_back(index.data(NoteListModel::NoteID).toInt());
         }
+
 
         //获取delegate，设置这些索引的状态
         NoteListDelegate *delegate = dynamic_cast<NoteListDelegate *>(itemDelegate());

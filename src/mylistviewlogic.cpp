@@ -348,7 +348,6 @@ void myListViewLogic::onNotePressed(const QModelIndexList &indexes)
 
 void myListViewLogic::deleteNoteRequestedI(const QModelIndexList &indexes)
 {
-
     if (!indexes.isEmpty())
     {
         bool isInTrash = false;
@@ -371,6 +370,8 @@ void myListViewLogic::deleteNoteRequestedI(const QModelIndexList &indexes)
                 }
                 needDeleteI.append(index);
                 needDelete.append(note);
+
+
             }
         }
         if (isInTrash)
@@ -383,19 +384,25 @@ void myListViewLogic::deleteNoteRequestedI(const QModelIndexList &indexes)
             if (btn == QMessageBox::Yes)
             {
                 selectNoteDown();
+
                 bool needClose = false;
+
                 if (m_listModel->rowCount() == needDeleteI.size())
                 {
                     needClose = true;
                 }
+
                 m_listModel->removeNotes(needDeleteI);
-                if (needClose)
-                {
-                    emit closeNoteEditor();
-                }
+
                 for (const auto &note : qAsConst(needDelete))
                 {
                     emit requestRemoveNoteDb(note);
+                }
+
+
+                if (needClose)
+                {
+                    emit closeNoteEditor();
                 }
             }
         }

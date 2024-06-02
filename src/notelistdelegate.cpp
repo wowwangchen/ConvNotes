@@ -84,7 +84,6 @@ NoteListDelegate::NoteListDelegate(myListView *view, QObject *parent):
             m_view->openPersistentEditorC(index);
         }
 
-
         //队列不为空
         if (!animationQueue.empty())
         {
@@ -120,7 +119,7 @@ NoteListDelegate::NoteListDelegate(myListView *view, QObject *parent):
 
 void NoteListDelegate::setState(NoteListState NewState, QModelIndexList indexes)
 {
-    //动画状态是不运行状态
+    //动画状态是运行状态
     if (animationState() != QTimeLine::NotRunning)
     {
         //遍历所有传入的索引，获取节点对应的id
@@ -138,7 +137,6 @@ void NoteListDelegate::setState(NoteListState NewState, QModelIndexList indexes)
             animationQueue.push_back(qMakePair(ids, NewState)); //这个id集合与状态值组成的键值对添加到队列中
         }
     }
-    //为暂停或者运行状态，进入函数
     else
     {
         setStateI(NewState, indexes);
@@ -155,7 +153,8 @@ void NoteListDelegate::setStateI(NoteListState NewState, const QModelIndexList &
     {
         for (const auto &index : qAsConst(m_animatedIndexes))
         {
-            m_view->closePersistentEditorC(index);
+            if(index.isValid())
+                m_view->closePersistentEditorC(index);
         }
         m_timeLine->setDirection(diretion);
         m_timeLine->setDuration(duration);

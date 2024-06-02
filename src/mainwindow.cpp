@@ -390,7 +390,6 @@ void MainWindow::initConnect()
             &MainWindow::onNewNoteButtonClicked);
     //移动节点
     connect(m_listViewLogic, &myListViewLogic::moveNoteRequested, this, [this](int id, int target) {
-        qDebug()<<__FUNCTION__<<__LINE__;
         m_treeViewLogic->onMoveNodeRequested(id, target);
         m_treeViewLogic->openFolder(target);
     });
@@ -480,7 +479,6 @@ void MainWindow::createNewNote()
     //是临时笔记
     else
     {
-        qDebug()<<"is temp note";
         newNoteIndex = m_listModel->getNoteIndex(m_noteEditorLogic->currentEditingNoteId());
         m_listView->animateAddedRow({ newNoteIndex });
     }

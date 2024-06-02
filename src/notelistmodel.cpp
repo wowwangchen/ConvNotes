@@ -60,11 +60,6 @@ QModelIndex NoteListModel::insertNote(const NodeData &note, int row)
         beginInsertRows(QModelIndex(), row, row);
         m_pinnedList.insert(row, note);
 
-        for(auto& iter:m_pinnedList)
-        {
-            qDebug()<<iter.id();
-        }
-
         endInsertRows();
 
         emit rowsInsertedC({ createIndex(row, 0) });
@@ -86,10 +81,6 @@ QModelIndex NoteListModel::insertNote(const NodeData &note, int row)
         beginInsertRows(QModelIndex(), row, row);
         m_noteList.insert(row - m_pinnedList.size(), note);
 
-        for(auto& iter:m_noteList)
-        {
-            qDebug()<<iter.id();
-        }
         endInsertRows();
         emit rowsInsertedC({ createIndex(row, 0) });
         emit rowCountChanged();
@@ -209,6 +200,16 @@ void NoteListModel::setNoteData(const QModelIndex &index, const NodeData &note)
     }
 
     emit dataChanged(index,index);   //this->index(index.row()), this->index(index.row())
+}
+
+bool NoteListModel::noteIsHaveTag(const QModelIndex &index) const
+{
+    if (index.row() < 0 || index.row() >= (m_noteList.count() + m_pinnedList.count()))
+    {
+        return false;
+    }
+
+    return true;
 }
 
 const NodeData &NoteListModel::getNote(const QModelIndex &index) const
