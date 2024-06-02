@@ -191,23 +191,20 @@ void myTreeView::closeCurrentEditor()
 
 void myTreeView::updateEditingIndex(QPoint pos)
 {
-
     auto index = indexAt(pos);
     if(!index.isValid())
     {
         qDebug()<<__FUNCTION__<<__LINE__<<"index is not valid";
         return;
     }
-
     //如果点击的索引不等于当前编辑的节点并且菜单没打开并且当前不在编辑状态
-    if (indexAt(pos) != m_currentEditingIndex && !m_isContextMenuOpened && !m_isEditing)
+    if (index!= m_currentEditingIndex && !m_isContextMenuOpened && !m_isEditing)
     {
         //获取节点类型
         auto itemType = static_cast<NodeItem::Type>(index.data(NodeItem::Roles::ItemType).toInt());
         if (itemType == NodeItem::Type::FolderItem || itemType == NodeItem::Type::TrashButton
             || itemType == NodeItem::Type::AllNoteButton)
         {
-
             closePersistentEditor(m_currentEditingIndex); //关闭当前编辑的节点的持久化编辑
             openPersistentEditor(index);                  //打开新节点的持久化编辑器
             m_currentEditingIndex = index;                //将新节点设为当前编辑节点
@@ -217,9 +214,7 @@ void myTreeView::updateEditingIndex(QPoint pos)
             closeCurrentEditor();
         }
     }
-//    if(index==m_currentEditingIndex) qDebug()<<1;
-//    if(!m_isContextMenuOpened) qDebug()<<2;
-//    if(!m_isEditing) qDebug()<<3;
+
 }
 
 void myTreeView::setIgnoreThisCurrentLoad(bool newIgnoreThisCurrentLoad)
@@ -452,8 +447,6 @@ void myTreeView::dragEnterEvent(QDragEnterEvent *event)
 void myTreeView::dropEvent(QDropEvent *event)
 {
 
-    qDebug()<<__FUNCTION__<<__LINE__;
-
     //判断拖入事件是否包含特定格式，也就是看拖动的是不是节点
     if (event->mimeData()->hasFormat(NOTE_MIME))
     {
@@ -503,6 +496,7 @@ void myTreeView::dropEvent(QDropEvent *event)
 
 void myTreeView::dragMoveEvent(QDragMoveEvent *event)
 {
+
     //笔记类型
     if (event->mimeData()->hasFormat(NOTE_MIME))
     {
@@ -517,7 +511,6 @@ void myTreeView::dragMoveEvent(QDragMoveEvent *event)
             }
         }
     }
-
     //不是笔记类型
     else
     {
@@ -527,17 +520,15 @@ void myTreeView::dragMoveEvent(QDragMoveEvent *event)
             auto trashRect =   //获取垃圾桶项的坐标矩形
                 visualRect(dynamic_cast<myTreeViewModel *>(model())->getTrashButtonIndex());
 
-            //qDebug()<<trashRect;
-            //qDebug()<<event->pos();
             //拖动到垃圾桶范围内
             //event->pos().y() > (trashRect.y() + 5)&& event->pos().y() < (trashRect.bottom() - 5)
-            if (event->pos().y() > (trashRect.y() + 5)
-                && event->pos().y() < (trashRect.bottom() - 5))
+            if (event->pos().y() > (trashRect.y() + 5) && event->pos().y() < (trashRect.bottom() - 5))
             {
                 setDropIndicatorShown(true); //显示拖放指示器
                 QTreeView::dragMoveEvent(event);
                 return;
             }
+
             //在整个树形结构之外，忽略
             if (m_treeSeparator.size() > 1 && event->pos().y() > visualRect(m_treeSeparator[1]).y())
             {
@@ -569,7 +560,9 @@ void myTreeView::mouseMoveEvent(QMouseEvent *event)
     {
         return;
     }
+
     //updateEditingIndex(event->pos());
+
     //如果是拖动状态
     if (state() == DraggingState)
     {

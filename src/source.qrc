@@ -20,5 +20,6 @@
         <file>syles/fontawesome-webfont.ttf</file>
         <file>syles/toolButton.css</file>
         <file>syles/menu.css</file>
+        <file>image/notep.png</file>
     </qresource>
 </RCC>

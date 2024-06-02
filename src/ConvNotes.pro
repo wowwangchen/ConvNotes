@@ -20,6 +20,7 @@ SOURCES += \
     labeledittype.cpp \
     main.cpp \
     mainwindow.cpp \
+    markdownhighlighter.cpp \
     mylistview.cpp \
     mylistviewlogic.cpp \
     mytreeview.cpp \
@@ -34,6 +35,7 @@ SOURCES += \
     notelistdelegateeditor.cpp \
     notelistmodel.cpp \
     pushbuttontype.cpp \
+    qownlanguagedata.cpp \
     trashbuttondelegateeditor.cpp
 
 HEADERS += \
@@ -48,6 +50,7 @@ HEADERS += \
     fontloader.h \
     labeledittype.h \
     mainwindow.h \
+    markdownhighlighter.h \
     mylistview.h \
     mylistviewlogic.h \
     mytreeview.h \
@@ -62,6 +65,7 @@ HEADERS += \
     notelistdelegateeditor.h \
     notelistmodel.h \
     pushbuttontype.h \
+    qownlanguagedata.h \
     trashbuttondelegateeditor.h
 
 FORMS += \

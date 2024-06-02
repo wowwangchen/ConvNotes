@@ -891,6 +891,7 @@ void myListView::scrollContentsBy(int dx, int dy)
 
 void myListView::startDrag(Qt::DropActions supportedActions)
 {
+        //  qDebug()<<__FUNCTION__<<__LINE__;
     Q_UNUSED(supportedActions);
     Q_D(myListView);
 
@@ -903,7 +904,7 @@ void myListView::startDrag(Qt::DropActions supportedActions)
     }
     QRect rect;
     QPixmap pixmap;
-
+          //    qDebug()<<__FUNCTION__<<__LINE__;
     //若只选中了一个
     if (indexes.size() == 1)
     {
@@ -935,7 +936,7 @@ void myListView::startDrag(Qt::DropActions supportedActions)
             pixmap = d->renderToPixmap(indexes, &rect);
         }
 
-
+        //  qDebug()<<__FUNCTION__<<__LINE__;
         //数据模型中又置顶，且第一个置顶与不置顶的笔记都是当前节点
         auto model = dynamic_cast<NoteListModel *>(this->model());
         if (model && model->hasPinnedNote()
@@ -953,11 +954,11 @@ void myListView::startDrag(Qt::DropActions supportedActions)
     //选中了多个，用一个图标代替
     else
     {
-        pixmap.load(":/image/notepads.png");
+        pixmap.load(":/image/notep.png");
         pixmap = pixmap.scaled(pixmap.width() / 4, pixmap.height() / 4, Qt::KeepAspectRatio,
                                Qt::SmoothTransformation);
 
-
+       //   qDebug()<<__FUNCTION__<<__LINE__;
 #ifdef __APPLE__
         QFont m_displayFont(QFont(QStringLiteral("SF Pro Text")).exactMatch()
                                 ? QStringLiteral("SF Pro Text")
@@ -970,7 +971,7 @@ void myListView::startDrag(Qt::DropActions supportedActions)
         QFont m_displayFont(QStringLiteral("Roboto"));
 #endif
 
-
+        //  qDebug()<<__FUNCTION__<<__LINE__;
         //文本字体
         m_displayFont.setPixelSize(16);
         QFontMetrics fmContent(m_displayFont);
@@ -1005,10 +1006,12 @@ void myListView::startDrag(Qt::DropActions supportedActions)
     }
 
 
+
     QDrag *drag = new QDrag(this);  //创造操作发送拖放数据
     drag->setPixmap(pixmap);
     drag->setMimeData(mimeData);
     //设置浏览的图像的热点位置
+
     if (indexes.size() == 1)
     {
         drag->setHotSpot(d->pressedPosition - rect.topLeft());
@@ -1020,6 +1023,7 @@ void myListView::startDrag(Qt::DropActions supportedActions)
 
     //获取所有编辑器的widget
     auto openedEditors = m_openedEditor.keys();
+
     m_isDragging = true;
     Qt::DropAction dropAction = drag->exec(Qt::MoveAction); //进入拖动动作事件循环
     //用户取消了拖动，释放资源
@@ -1034,7 +1038,6 @@ void myListView::startDrag(Qt::DropActions supportedActions)
     d->dropEventMoved = false;
 #endif
 
-
     //善后
     m_isDragging = false;
     // Reset the drop indicator
@@ -1047,6 +1050,8 @@ void myListView::startDrag(Qt::DropActions supportedActions)
         openPersistentEditorC(index);
     }
     scrollContentsBy(0, 0); //刷新界面
+
+
 
 
 }

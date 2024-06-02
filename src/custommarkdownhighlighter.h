@@ -4,11 +4,14 @@
 #include <QObject>
 #include<QTextDocument>
 #include"mytreeview.h"
-class CustomMarkdownHighlighter : public QObject
+#include"markdownhighlighter.h"
+
+class CustomMarkdownHighlighter : public MarkdownHighlighter
 {
     Q_OBJECT
 public:
-    CustomMarkdownHighlighter(QTextDocument *parent = nullptr);
+    CustomMarkdownHighlighter(QTextDocument *parent = nullptr,
+                              HighlightingOptions highlightingOptions = HighlightingOption::None);
 
     void setFontSize(qreal fontSize);
     void setHeaderColors(QColor color);
