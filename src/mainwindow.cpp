@@ -34,11 +34,9 @@ MainWindow::MainWindow(QWidget *parent)
     setupModelView();
     initWindow();
     setupSearchEdit();
+    initConnect();
 
-
-        initConnect();
-
-            emit requestNodesTree();
+    emit requestNodesTree();
 }
 
 MainWindow::~MainWindow()
@@ -361,12 +359,8 @@ void MainWindow::initConnect()
     //初始化界面打开文件夹树
     connect(this, &MainWindow::requestNodesTree, m_dbManager, &DBManager::onNodeTagTreeRequested,
             Qt::BlockingQueuedConnection);
-    //新建笔记
-    connect(m_newNoteButton, &QPushButton::clicked, this, &MainWindow::onNewNoteButtonClicked);
     connect(m_searchEdit, &QLineEdit::textChanged, m_listViewLogic,
             &myListViewLogic::onSearchEditTextChanged);
-    //设置按钮
-    connect(ui->settingButton,&QPushButton::clicked,this,&MainWindow::settingButton_clicked);
     //connect(ui->allPackageTreeView,&myTreeView::renameFolderNameInDatabase,this,[=]{});
     //数据库加载文件夹树
     connect(this, &MainWindow::requestNodesTree, m_dbManager, &DBManager::onNodeTagTreeRequested,
@@ -385,9 +379,6 @@ void MainWindow::initConnect()
             [this](const QString &l1, const QString &l2) {
                 ui->packageNameLabel->setText(l1);
             });
-    //请求新建笔记
-    connect(m_listViewLogic, &myListViewLogic::requestNewNote, this,
-            &MainWindow::onNewNoteButtonClicked);
     //移动节点
     connect(m_listViewLogic, &myListViewLogic::moveNoteRequested, this, [this](int id, int target) {
         m_treeViewLogic->onMoveNodeRequested(id, target);
@@ -406,6 +397,15 @@ void MainWindow::initConnect()
     connect(m_treeView, &myTreeView::loadNotesInFolderRequested, m_listViewLogic,
             &myListViewLogic::onNotesListInFolderRequested);
 
+    //新建笔记
+    connect(m_newNoteButton, &QPushButton::clicked, this, &MainWindow::onNewNoteButtonClicked);
+    //请求新建笔记
+    connect(m_listViewLogic, &myListViewLogic::requestNewNote, this,
+            &MainWindow::onNewNoteButtonClicked);
+    //设置按钮
+    connect(ui->settingButton,&QPushButton::clicked,this,&MainWindow::settingButton_clicked);
+    //更多选项
+    connect(ui->moreSelectButton,&QPushButton::clicked,this,&MainWindow::onMoreSelectButtonClicked);
 }
 
 void MainWindow::setColorDialogSS(QColorDialog *dialog)
@@ -575,6 +575,33 @@ void MainWindow::onNewNoteButtonClicked()
     else
     {
         createNewNote();
+    }
+}
+
+void MainWindow::onMoreSelectButtonClicked()
+{
+    //获取背景图片
+    QString filename = QFileDialog::getOpenFileName(this, "Image File", QString(),
+                                                          "Image Files (*.png *.jpg *.bmp)");
+    if (!filename.isEmpty())
+    {
+        QPixmap m_backgroundImage(filename);
+        m_backgroundImage =
+ m_backgroundImage.scaled(ui->backFrame->size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+
+        //模糊
+//        QGraphicsBlurEffect* blurEffect = new QGraphicsBlurEffect(ui->backFrame);
+//        blurEffect->setBlurRadius(10); // 设置模糊半径
+//        blurEffect->setBlurHints(QGraphicsBlurEffect::PerformanceHint);
+//        ui->backFrame->setGraphicsEffect(blurEffect);
+
+
+        // 设置 QFrame 的背景图像
+        QString styleSheet = QString("QFrame#%1 { background-image: url('%2'); "
+                                     "background-repeat: no-repeat; background-position: center;"
+                                     " background-size: cover; }")
+                                 .arg(ui->backFrame->objectName(),filename);
+        ui->backFrame->setStyleSheet(styleSheet);
     }
 }
 

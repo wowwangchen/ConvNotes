@@ -21,5 +21,8 @@
         <file>syles/toolButton.css</file>
         <file>syles/menu.css</file>
         <file>image/notep.png</file>
+        <file>image/bktest.jpg</file>
+        <file>syles/scrollbar.css</file>
+        <file>syles/background.css</file>
     </qresource>
 </RCC>

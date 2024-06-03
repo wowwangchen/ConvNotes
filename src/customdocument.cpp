@@ -10,6 +10,9 @@ CustomDocument::CustomDocument(QWidget *parent) : QTextEdit(parent)
     viewport()->installEventFilter(this);               //视口安装事件过滤器
     setMouseTracking(true);                             //鼠标追踪
     setAttribute(Qt::WidgetAttribute::WA_Hover, true);  //启动悬停属性
+
+    setScrollBarSS();
+    this->setFontPointSize(20);
 }
 
 /*!
@@ -434,4 +437,15 @@ void CustomDocument::moveBlockDown()
     cursor.setPosition(startPosition + currentHorizontalPosition);
 
     setTextCursor(cursor);
+}
+
+void CustomDocument::setScrollBarSS()
+{
+    QFile t(":/syles/scrollbar.css");
+    if(t.open(QIODevice::ReadOnly))
+    {
+        QScrollBar* scrollBar=this->verticalScrollBar();
+        scrollBar->setStyleSheet(t.readAll());
+    }
+    t.close();
 }

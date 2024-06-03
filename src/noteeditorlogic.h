@@ -86,6 +86,7 @@ signals:
 private:
     CustomDocument*             m_textEdit;
     CustomMarkdownHighlighter*  m_highlighter;
+
     QLabel*                     m_editorDateLabel;
     QLineEdit*                  m_searchEdit;
 

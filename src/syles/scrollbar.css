@@ -1,0 +1,39 @@
+
+QScrollBar:vertical {
+    border: none;
+        border-radius: 4px;
+    width: 10px;
+        background-color: rgba(211, 226,226, 100);  /*背景颜色rgba(211, 226, 226, 100);*/
+    margin: 2px 0 2px 0;
+}
+QScrollBar::handle:vertical {
+    border: none;
+    border-radius: 4px;
+    background-color:  rgba(6,148,255,60);  /*当前进度的颜色*/
+    height: 60px;
+    margin: 0px 0px 0px 0px;
+}
+QScrollBar::add-line:vertical {
+        border: none;
+    height: 0px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+QScrollBar::sub-line:vertical {
+    border: none;
+    height: 0px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+QScrollBar::down-arrow:vertical {
+    border:none;
+}
+QScrollBar::up-arrow:vertical {
+    border:none;
+}
+QScrollBar::add-page:vertical {
+    background-color: rgba(211, 226, 226, 100);
+}
+QScrollBar::sub-page:vertical {
+    background-color: rgba(211, 226, 226, 100);
+}

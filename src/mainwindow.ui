@@ -18,6 +18,9 @@
     <normaloff>:/image/titleIcon.jpg</normaloff>:/image/titleIcon.jpg</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
    <layout class="QGridLayout" name="gridLayout_2">
     <property name="leftMargin">
      <number>0</number>
@@ -37,7 +40,15 @@
     <item row="0" column="0">
      <widget class="QFrame" name="backFrame">
       <property name="styleSheet">
-       <string notr="true"/>
+       <string notr="true">#backFrame 
+{ 
+	    
+	background-color: rgb(240, 240, 240);
+} 
+#backFrame * 
+{ 
+    border-image:url(); 
+}</string>
       </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
@@ -624,8 +635,7 @@ font: 700 9pt &quot;Arial&quot;;
             <widget class="CustomDocument" name="mainTextEdit">
              <property name="styleSheet">
               <string notr="true">background-color: transparent;
-border:none;
-font: 16pt &quot;Segoe Print&quot;;</string>
+border:none;</string>
              </property>
             </widget>
            </item>

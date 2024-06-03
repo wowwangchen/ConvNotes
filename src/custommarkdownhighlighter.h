@@ -12,9 +12,11 @@ class CustomMarkdownHighlighter : public MarkdownHighlighter
 public:
     CustomMarkdownHighlighter(QTextDocument *parent = nullptr,
                               HighlightingOptions highlightingOptions = HighlightingOption::None);
-
+    //字体大小
     void setFontSize(qreal fontSize);
+    //标题颜色
     void setHeaderColors(QColor color);
+    //列表颜色
     void setListsColor(QColor color);
 
     void setTheme(Theme::Value theme, QColor textColor, qreal fontSize);

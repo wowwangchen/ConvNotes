@@ -7,7 +7,8 @@
 #include <QStringList>
 #include<QMetaObject>
 #include <QTextEdit>
-
+#include<QFile>
+#include <QScrollBar>
 
 //自定义文本的
 class CustomDocument : public QTextEdit
@@ -36,6 +37,8 @@ public:
     void moveBlockUp();
     //将某块内容向下移动
     void moveBlockDown();
+    //滚动条样式表
+    void setScrollBarSS();
 
 signals:
     void resized();

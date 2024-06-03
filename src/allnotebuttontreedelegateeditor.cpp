@@ -33,7 +33,8 @@ AllNoteButtonTreeDelegateEditor::AllNoteButtonTreeDelegateEditor
     m_titleColor(26, 26, 26),
     m_titleSelectedColor(255, 255, 255),
     m_activeColor(68, 138, 201),
-    m_hoverColor(247, 247, 247),
+//    m_hoverColor(247, 247, 247),
+     m_hoverColor(Qt::transparent),
     m_folderIconColor(68, 138, 201),
     m_numberOfNotesColor(26, 26, 26, 127),
     m_numberOfNotesSelectedColor(255, 255, 255),
@@ -52,7 +53,8 @@ void AllNoteButtonTreeDelegateEditor::setTheme(Theme::Value theme)
     {
     case Theme::Light:
     {
-        m_hoverColor = QColor(247, 247, 247);
+//        m_hoverColor = QColor(247, 247, 247);
+        m_hoverColor = QColor(Qt::transparent);
         m_titleColor = QColor(26, 26, 26);
         m_numberOfNotesColor = QColor(26, 26, 26, 127);
         break;

@@ -10,10 +10,13 @@
 #include<QSettings>
 #include<QFile>
 #include<QEvent>
+#include<QPixmap>
 #include<QThread>
 #include<QDir>
 #include<QFileInfo>
+#include<QDir>
 #include<QDebug>
+#include<QFileDialog>
 #include<QMetaType>
 #include"mytreeview.h"
 #include"mytreeviewlogic.h"
@@ -106,6 +109,7 @@ protected:
 private slots:
     void on_searchButton_clicked();
     void onNewNoteButtonClicked();
+    void onMoreSelectButtonClicked();
 
 
 private:

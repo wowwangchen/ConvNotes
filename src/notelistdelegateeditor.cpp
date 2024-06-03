@@ -40,7 +40,8 @@ NoteListDelegateEditor::NoteListDelegateEditor(const NoteListDelegate *delegate,
     m_hoverColor(207, 207, 207),
     m_applicationInactiveColor(207, 207, 207),
     m_separatorColor(191, 191, 191),
-    m_defaultColor(240, 240, 240),
+    //m_defaultColor(240, 240, 240),
+    m_defaultColor(Qt::transparent),
     m_rowHeight(106),
     m_rowRightOffset(0),
     m_isActive(false),
@@ -129,7 +130,8 @@ void NoteListDelegateEditor::setTheme(Theme::Value theme)
     case Theme::Light: {
         m_titleColor = QColor(26, 26, 26);
         m_dateColor = QColor(26, 26, 26);
-        m_defaultColor = QColor(240, 240, 240);
+//        m_defaultColor = QColor(240, 240, 240);
+        m_defaultColor=QColor(Qt::transparent);
         m_ActiveColor = QColor(218, 233, 239);
         m_notActiveColor = QColor(175, 212, 228);
         m_hoverColor = QColor(207, 207, 207);

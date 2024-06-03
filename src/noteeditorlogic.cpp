@@ -96,13 +96,12 @@ QString NoteEditorLogic::getSecondLine(const QString &str)
 
 bool NoteEditorLogic::markdownEnabled() const
 {
-    return false;
-    //return m_highlighter->document() != nullptr;
+    return m_highlighter->document() != nullptr;
 }
 
 void NoteEditorLogic::setMarkdownEnabled(bool enabled)
 {
-    //m_highlighter->setDocument(enabled ? m_textEdit->document() : nullptr);
+    m_highlighter->setDocument(enabled ? m_textEdit->document() : nullptr);
 }
 
 QString NoteEditorLogic::getNoteDateEditor(const QString &dateEdited)
@@ -421,20 +420,54 @@ QMap<QString, int> NoteEditorLogic::getTaskDataInLine(const QString &line)
 
 void NoteEditorLogic::replaceTextBetweenLines(int startLinePosition, int endLinePosition, QString &newText)
 {
-
+    QTextDocument *document = m_textEdit->document();
+    QTextBlock startBlock = document->findBlockByLineNumber(startLinePosition);
+    QTextBlock endBlock = document->findBlockByLineNumber(endLinePosition);
+    QTextCursor cursor(startBlock);
+    cursor.setPosition(endBlock.position() + endBlock.length() - 1, QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
+    cursor.insertText(newText);
 }
 
 void NoteEditorLogic::removeTextBetweenLines(int startLinePosition, int endLinePosition)
 {
+    if (startLinePosition < 0 || endLinePosition < startLinePosition) {
+        return;
+    }
 
+    QTextDocument *document = m_textEdit->document();
+    QTextCursor cursor(document);
+    cursor.setPosition(document->findBlockByNumber(startLinePosition).position());
+    cursor.setPosition(document->findBlockByNumber(endLinePosition).position(),
+                       QTextCursor::KeepAnchor);
+    cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+    if (document->findBlockByNumber(endLinePosition + 1).isValid()) {
+        cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+    }
+    cursor.removeSelectedText();
 }
 
 void NoteEditorLogic::appendNewColumn(QJsonArray &data, QJsonObject &currentColumn, QString &currentTitle, QJsonArray &tasks)
 {
-
+    if (!tasks.isEmpty()) {
+        currentColumn["title"] = currentTitle;
+        currentColumn["tasks"] = tasks;
+        currentColumn["columnEndLine"] = tasks.last()["taskEndLine"];
+        data.append(currentColumn);
+        currentColumn = QJsonObject();
+        tasks = QJsonArray();
+    }
 }
 
 void NoteEditorLogic::addUntitledColumnToTextEditor(int startLinePosition)
 {
+    QString columnTitle = "# Untitled\n\n";
+    QTextDocument *document = m_textEdit->document();
+    QTextBlock block = document->findBlockByNumber(startLinePosition);
 
+    if (block.isValid()) {
+        QTextCursor cursor(block);
+        cursor.movePosition(QTextCursor::StartOfBlock);
+        cursor.insertText(columnTitle);
+    }
 }
