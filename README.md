@@ -12,7 +12,8 @@
 文件列表：
 ![image](https://github.com/wowwangchen/ConvNotes/assets/130348678/058b5067-582e-4e5b-a9c5-b3048cb9a15e)
 语法高亮：
-<img width="852" alt="b1886cde134a3805d0cb831741c66fd0" src="https://github.com/wowwangchen/ConvNotes/assets/130348678/afca2409-9114-4ace-8834-9ec38c95262c">
+<img width="852" alt="b7cfa7b5d063955acd69c33eb41f1c2c" src="https://github.com/wowwangchen/ConvNotes/assets/130348678/1810edc6-79f3-44ee-b0bf-c0992dd02b98">
+
 
 
 
