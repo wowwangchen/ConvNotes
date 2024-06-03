@@ -21,6 +21,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     markdownhighlighter.cpp \
+    morebutton.cpp \
     mylistview.cpp \
     mylistviewlogic.cpp \
     mytreeview.cpp \
@@ -51,6 +52,7 @@ HEADERS += \
     labeledittype.h \
     mainwindow.h \
     markdownhighlighter.h \
+    morebutton.h \
     mylistview.h \
     mylistviewlogic.h \
     mytreeview.h \
@@ -69,7 +71,8 @@ HEADERS += \
     trashbuttondelegateeditor.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    morebutton.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

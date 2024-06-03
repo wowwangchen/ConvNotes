@@ -12,7 +12,7 @@ CustomDocument::CustomDocument(QWidget *parent) : QTextEdit(parent)
     setAttribute(Qt::WidgetAttribute::WA_Hover, true);  //启动悬停属性
 
     setScrollBarSS();
-    this->setFontPointSize(20);
+    this->setFontPointSize(15);
 }
 
 /*!

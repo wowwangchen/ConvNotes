@@ -209,6 +209,7 @@ void NoteEditorLogic::setTheme(Theme::Value theme, QColor textColor, qreal fontS
         showNotesInEditor(m_currentNotes);
         m_textEdit->verticalScrollBar()->setValue(verticalScrollBarValueToRestore);
     }
+    m_textEdit->setFontPointSize(fontSize);
 }
 
 int NoteEditorLogic::currentAdaptableEditorPadding() const

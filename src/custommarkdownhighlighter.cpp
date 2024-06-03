@@ -7,7 +7,7 @@ CustomMarkdownHighlighter::CustomMarkdownHighlighter(QTextDocument *parent, High
 {
     setListsColor(QColor(35, 131, 226)); // accent color
 
-    setFontSize(20);
+    setFontSize(15);
 
     _formats[static_cast<HighlighterState>(HighlighterState::HorizontalRuler)].clearBackground();
 }

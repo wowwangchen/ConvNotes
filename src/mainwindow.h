@@ -28,6 +28,7 @@
 #include"noteeditorlogic.h"
 #include"customdocument.h"
 #include"custommarkdownhighlighter.h"
+#include"morebutton.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -99,6 +100,7 @@ public slots:
 signals:
     void requestOpenDBManager(const QString &path, bool doCreate);
     void requestNodesTree();
+    void requestSetTheme(Theme::Value theme, QColor textColor, qreal fontSize);
 
 
 protected:
@@ -110,6 +112,8 @@ private slots:
     void on_searchButton_clicked();
     void onNewNoteButtonClicked();
     void onMoreSelectButtonClicked();
+    void AddSize();
+    void ReduceSize();
 
 
 private:
@@ -144,6 +148,8 @@ private:
     QMenu                   m_mainMenu;                     //菜单
     QToolButton*            m_searchButton;                 //搜索按钮
     QToolButton*            m_clearButton;                  //当输入内容后要出来的一个按钮
+    MoreButton*             m_moreWidget;                   //更多选项
+    int                     m_fontSize;                     //字体大小
 
     NoteEditorLogic*        m_noteEditorLogic;              //笔记编写的操控类
     CustomDocument*         m_textEdit;                     //代表文本编辑框

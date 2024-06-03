@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_editorDateLabel(nullptr),
     m_dbManager(nullptr),
     m_searchButton(nullptr),
+    m_moreWidget(nullptr),
+    m_fontSize(15),
     m_noteEditorLogic(nullptr),
     m_textEdit(nullptr)
 
@@ -42,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete m_moreWidget;
     m_dbThread->quit();
     m_dbThread->wait();
     delete m_dbThread;
@@ -97,6 +100,8 @@ void MainWindow::setupSearchEdit()
 void MainWindow::setupMainWindow()
 {
     //setupModelView();
+    m_moreWidget=new MoreButton(this);
+    m_moreWidget->hide();
 
     //各种按钮的设置
     m_newNoteButton = ui->addFileButton;
@@ -406,6 +411,16 @@ void MainWindow::initConnect()
     connect(ui->settingButton,&QPushButton::clicked,this,&MainWindow::settingButton_clicked);
     //更多选项
     connect(ui->moreSelectButton,&QPushButton::clicked,this,&MainWindow::onMoreSelectButtonClicked);
+
+    //编辑的字体大小相关
+    connect(m_moreWidget,&MoreButton::reduceSize,this,&MainWindow::ReduceSize);
+    connect(m_moreWidget,&MoreButton::addSize,this,&MainWindow::AddSize);
+    connect(this,&MainWindow::requestSetTheme,m_noteEditorLogic,&NoteEditorLogic::setTheme);
+    connect(m_moreWidget,&MoreButton::requestHide,this,[&]{
+          qDebug()<<"222";
+        m_moreWidget->hide();
+    });
+
 }
 
 void MainWindow::setColorDialogSS(QColorDialog *dialog)
@@ -504,6 +519,9 @@ void MainWindow::setTheme(Theme::Value theme)
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     Q_UNUSED(event);
+    if(m_moreWidget->rect().contains(event->pos())==false)
+        m_moreWidget->hide();
+
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
@@ -580,28 +598,33 @@ void MainWindow::onNewNoteButtonClicked()
 
 void MainWindow::onMoreSelectButtonClicked()
 {
-    //获取背景图片
-    QString filename = QFileDialog::getOpenFileName(this, "Image File", QString(),
-                                                          "Image Files (*.png *.jpg *.bmp)");
-    if (!filename.isEmpty())
+    if(m_moreWidget->isHidden())
     {
-        QPixmap m_backgroundImage(filename);
-        m_backgroundImage =
- m_backgroundImage.scaled(ui->backFrame->size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
-
-        //模糊
-//        QGraphicsBlurEffect* blurEffect = new QGraphicsBlurEffect(ui->backFrame);
-//        blurEffect->setBlurRadius(10); // 设置模糊半径
-//        blurEffect->setBlurHints(QGraphicsBlurEffect::PerformanceHint);
-//        ui->backFrame->setGraphicsEffect(blurEffect);
-
-
-        // 设置 QFrame 的背景图像
-        QString styleSheet = QString("QFrame#%1 { background-image: url('%2'); "
-                                     "background-repeat: no-repeat; background-position: center;"
-                                     " background-size: cover; }")
-                                 .arg(ui->backFrame->objectName(),filename);
-        ui->backFrame->setStyleSheet(styleSheet);
+        QPoint point=QPoint(ui->moreSelectButton->x()+400,ui->moreSelectButton->y()+20);
+        m_moreWidget->move(point);
+        m_moreWidget->show();
     }
+    else
+        m_moreWidget->hide();
+}
+
+void MainWindow::AddSize()
+{
+    m_fontSize+=1;
+    if(m_fontSize>30)
+        m_fontSize=30;
+    emit requestSetTheme(Theme::Light,QColor(10,10,10),m_fontSize);
+
+
+}
+
+void MainWindow::ReduceSize()
+{
+    m_fontSize-=1;
+    if(m_fontSize<10)
+        m_fontSize=10;
+    emit requestSetTheme(Theme::Light,QColor(10,10,10),m_fontSize);
+
+
 }
 
